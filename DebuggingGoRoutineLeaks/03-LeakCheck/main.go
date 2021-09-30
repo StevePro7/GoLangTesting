@@ -5,21 +5,9 @@ import (
 	"github.com/rpccloud/goid"
 	"log"
 	"net/http"
-	"runtime"
 	"strconv"
 	"time"
 )
-
-// get the count of number of go routines in the system
-func countGoRoutines() int {
-	return runtime.NumGoroutine()
-}
-
-func getGoroutineCountHandler(w http.ResponseWriter, r *http.Request) {
-	// Get the count of number of go routines running
-	count := countGoRoutines()
-	w.Write([]byte(strconv.Itoa(count)))
-}
 
 // function to add an array of numbers
 func sum(s []int, c chan int) {
@@ -64,12 +52,7 @@ func sumConcurrent(w http.ResponseWriter, _ *http.Request) {
 }
 func main() {
 
-	// get the suym of numbers
 	http.HandleFunc("/sum", sumConcurrent)
-
-	// get the count of number of go routines in the system
-	http.HandleFunc("/count", getGoroutineCountHandler)
-
 	err := http.ListenAndServe(":8002", nil)
 	if err != nil {
 		log.Fatal("L+S ", err)

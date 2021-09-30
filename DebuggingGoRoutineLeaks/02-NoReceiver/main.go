@@ -1,7 +1,7 @@
 package main
 
 import (
-	fmt "fmt"
+	"fmt"
 	"github.com/rpccloud/goid"
 	"log"
 	"net/http"
@@ -22,7 +22,7 @@ func sum(s []int, c chan int) {
 	c <- sum // send sum to c
 }
 
-func sumConcurrent(w http.ResponseWriter, r *http.Request) {
+func sumConcurrent(w http.ResponseWriter, _ *http.Request) {
 	id := goid.GetRoutineId()
 
 	s := []int{7, 2, 8, -9, 4, 0}
@@ -37,10 +37,18 @@ func sumConcurrent(w http.ResponseWriter, r *http.Request) {
 	go sum(s[len(s)/2:], c2)
 
 	x := <-c1
-	fmt.Fprintf(w, strconv.Itoa(int(id)))
-	fmt.Fprintf(w, " => ")
-	fmt.Fprintf(w, strconv.Itoa(x))
 
+	var err error
+	_, err = fmt.Fprintf(w, strconv.Itoa(int(id)))
+	_, err = fmt.Fprintf(w, " => ")
+	_, err = fmt.Fprintf(w, strconv.Itoa(x))
+
+	if err != nil {
+		_, err := fmt.Fprintln(w, err.Error())
+		if err != nil {
+			return
+		}
+	}
 }
 func main() {
 

@@ -1,16 +1,12 @@
-package main_test
+package main
 
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/ghttp"
-	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"testing"
-
-	. "unittesting"
 )
 
 func TestUnitTestingGinkgoSeries(t *testing.T) {
@@ -18,10 +14,15 @@ func TestUnitTestingGinkgoSeries(t *testing.T) {
 	RunSpecs(t, "TestingDemo Suite")
 }
 
-var _ = Describe("Server", func() {
+var _ = Describe("Client", func() {
 
-	var server *ghttp.Server
-	msg := "Hi there, the end point is :"
+	var (
+		server     *ghttp.Server
+		statusCode int
+		body       []byte
+		path       string
+		addr       string
+	)
 
 	BeforeEach(func() {
 		// start a test http server
@@ -31,78 +32,60 @@ var _ = Describe("Server", func() {
 		server.Close()
 	})
 
+	Context("When given empty url", func() {
+		BeforeEach(func() {
+			addr = ""
+		})
+		It("Returns the empty path", func() {
+			_, err := getResponse(addr)
+			Expect(err).Should(HaveOccurred())
+		})
+	})
+
+	Context("When give unsupported protocol scheme", func() {
+		BeforeEach(func() {
+			addr = "tcp://loclahoset"
+		})
+		It("Returns the empty path", func() {
+			_, err := getResponse(addr)
+			Expect(err).Should(HaveOccurred())
+		})
+	})
+
 	Context("When get request is sent to empty path", func() {
 		BeforeEach(func() {
-			// Add your handler which has to be called for a given path
-			// If there are multiple redirects then append all the handlers
-			server.AppendHandlers(Handler)
+			statusCode = http.StatusOK
+			path = "/"
+			body = []byte("Hi there, the end point is :!")
+			addr = "http://" + server.Addr() + path
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", path),
+					ghttp.RespondWithPtr(&statusCode, &body),
+				))
 		})
-
-		It("Returns the empty path", func() {
-			resp, err := http.Get(server.URL() + "/")
+		It("Returns the hello path", func() {
+			bdy, err := getResponse(addr)
 			Expect(err).ShouldNot(HaveOccurred())
-			Expect(resp.StatusCode).Should(Equal(http.StatusOK))
-
-			body, err := ioutil.ReadAll(resp.Body)
-			if err != nil {
-				return
-			}
-
-			defer func(body io.ReadCloser) {
-				_ = body.Close()
-			}(resp.Body)
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(string(body)).To(Equal(msg + "!"))
+			Expect(bdy).To(Equal(body))
 		})
 	})
 
-	Context("When get request is sent to hello path", func() {
+	Context("When get request is sent to read path but therre is no file", func() {
 		BeforeEach(func() {
+			statusCode = http.StatusInternalServerError
+			path = "/read"
+			body = []byte("open data.txt: no such fileor directory\r\n")
+			addr = "https://" + server.Addr() + path
 			server.AppendHandlers(
-				Handler,
-			)
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", path),
+					ghttp.RespondWithPtr(&statusCode, &body),
+				))
 		})
-
-		It("Returns the empty path", func() {
-			resp, err := http.Get(server.URL() + "/hello")
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(resp.StatusCode).Should(Equal(http.StatusOK))
-
-			body, err := ioutil.ReadAll(resp.Body)
-			if err != nil {
-				return
-			}
-
-			defer func(body io.ReadCloser) {
-				_ = body.Close()
-			}(resp.Body)
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(string(body)).To(Equal(msg + "hello!"))
-		})
-	})
-
-	Context("When get requeset is sent to read path but there is no file", func() {
-		BeforeEach(func() {
-			server.AppendHandlers(
-				ReadHandler,
-			)
-		})
-
-		It("Returns internal server errror", func() {
-			resp, err := http.Get(server.URL() + "/read")
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(resp.StatusCode).Should(Equal(http.StatusInternalServerError))
-
-			body, err := ioutil.ReadAll(resp.Body)
-			if err != nil {
-				return
-			}
-
-			defer func(body io.ReadCloser) {
-				_ = body.Close()
-			}(resp.Body)
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(string(body)).To(Equal("open data.txt: no such file or directory\n"))
+		It("Returns internal server error", func() {
+			_, err := getResponse(addr)
+			Expect(err).Should(HaveOccurred())
 		})
 	})
 
@@ -110,11 +93,19 @@ var _ = Describe("Server", func() {
 		BeforeEach(func() {
 			file, err := os.Create("data.txt")
 			Expect(err).NotTo(HaveOccurred())
-			_, err = file.Write([]byte("Hi there!"))
+			body = []byte("Hi there!")
+			_, err = file.Write(body)
 			if err != nil {
 				return
 			}
-			server.AppendHandlers(ReadHandler)
+			statusCode = http.StatusOK
+			path = "/read"
+			addr = "http://" + server.Addr() + path
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", path),
+					ghttp.RespondWithPtr(&statusCode, &body),
+				))
 		})
 
 		AfterEach(func() {
@@ -122,20 +113,10 @@ var _ = Describe("Server", func() {
 			Expect(err).NotTo(HaveOccurred())
 		})
 		It("Reads data from file successfully", func() {
-			resp, err := http.Get(server.URL() + "/read")
+			bdy, err := getResponse(addr)
 			Expect(err).ShouldNot(HaveOccurred())
-			Expect(resp.StatusCode).Should(Equal(http.StatusOK))
-
-			body, err := ioutil.ReadAll(resp.Body)
-			if err != nil {
-				return
-			}
-
-			defer func(body io.ReadCloser) {
-				_ = body.Close()
-			}(resp.Body)
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(string(body)).To(Equal("Content in file is...\r\nHi there!"))
+			Expect(bdy).To(Equal(body))
 		})
+
 	})
 })

@@ -21,3 +21,8 @@ adder_test.go
 adder.go
 
 ginkgo
+
+
+REMEMBER
+import statement uses "." so don't have to prefix
+gomega.Expect

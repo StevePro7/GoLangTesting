@@ -1,0 +1,7 @@
+Unit testing in ginkgo
+02/10/2021
+
+https://utkarshmani1997.medium.com/unit-testing-with-ginkgo-part-3-9c1a4b892e01
+
+curl http://localhost:8002
+curl http://localhost:8002/read

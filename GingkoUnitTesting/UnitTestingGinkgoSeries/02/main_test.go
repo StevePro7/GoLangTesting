@@ -1,10 +1,13 @@
 package main_test
 
 import (
-	"testing"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/ghttp"
+	"io"
+	"io/ioutil"
+	"net/http"
+	"testing"
 
 	. "unittesting"
 )
@@ -14,26 +17,43 @@ func TestUnitTestingGinkgoSeries(t *testing.T) {
 	RunSpecs(t, "TestingDemo Suite")
 }
 
-var _ = Describe("Sum", func() {
+var _ = Describe("Server", func() {
 
-	var (
-		p, q, m, n, sum1, sum2 int
-	)
+	var server *ghttp.Server
+	msg := "Hi there, the end point is :"
 
 	BeforeEach(func() {
-		p, q, sum1 = 5, 6, 11
-		// putting wrong value of sum2 intentionally
-		m, n, sum2 = 8, 7, 16
+		// start a test http server
+		server = ghttp.NewServer()
 	})
 
-	Context("Addition of two digits", func() {
-		It("should return sum of the two digits", func() {
-			additionOfTwoDigits := Sum(p, q)
-			Expect(additionOfTwoDigits).Should(Equal(sum1))
+	AfterEach(func() {
+		server.Close()
+	})
+
+	Context("When get request is sent to empty path", func() {
+
+		BeforeEach(func() {
+			// Add your handler which has to be called for a given path
+			// If there are multiple redirects then append all the handlers
+			server.AppendHandlers(Handler)
 		})
-		It("should not return the sum provided", func() {
-			additionOfTwoDigits := Sum(m, n)
-			Expect(additionOfTwoDigits).ShouldNot(Equal(sum2))
+
+		It("Returns the empty path", func() {
+			resp, err := http.Get(server.URL() + "/")
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(resp.StatusCode).Should(Equal(http.StatusOK))
+
+			body, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return
+			}
+
+			defer func(Body io.ReadCloser) {
+				_ = Body.Close()
+			}(resp.Body)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(string(body)).To(Equal(msg + "!"))
 		})
 	})
 

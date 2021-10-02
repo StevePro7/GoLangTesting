@@ -4,3 +4,9 @@ Unit Testing with Ginkgo
 https://utkarshmani1997.medium.com/unit-testing-with-ginkgo-part-1-be7acc6c84c6
 https://utkarshmani1997.medium.com/unit-testing-with-ginkgo-part-2-fe6ed881c635
 https://utkarshmani1997.medium.com/unit-testing-with-ginkgo-part-3-9c1a4b892e01
+
+
+weird
+cd ~/GitHub/StevePro7/GoLangTesting/GingkoUnitTesting/UnitTestingGinkgoSeries
+ginkgo boostrap
+

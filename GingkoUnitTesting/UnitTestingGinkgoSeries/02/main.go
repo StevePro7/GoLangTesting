@@ -6,12 +6,8 @@ import (
 	"net/http"
 )
 
-func Sum(x, y int) int {
-	return x + y
-}
-
 func Handler(w http.ResponseWriter, r *http.Request) {
-	_, err := fmt.Fprintf(w, "Hi there endpoint %s", r.URL.Path[1:])
+	_, err := fmt.Fprintf(w, "Hi there, the end point is :%s!", r.URL.Path[1:])
 	if err != nil {
 		return
 	}
@@ -24,7 +20,7 @@ func ReadHandler(w http.ResponseWriter, _ *http.Request) {
 		return
 	}
 
-	_, err = fmt.Fprintf(w, "Content in file is \r\n %s", string(dat))
+	_, err = fmt.Fprintf(w, "Content in file is...\r\n%s", string(dat))
 	if err != nil {
 		return
 	}

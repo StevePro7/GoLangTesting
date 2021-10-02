@@ -1,0 +1,17 @@
+package main_test
+
+import (
+	"testing"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+)
+
+func TestUnitTestingGinkgoSeries(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "TestingDemo Suite")
+}
+
+var _ = Describe("01", func() {
+
+})

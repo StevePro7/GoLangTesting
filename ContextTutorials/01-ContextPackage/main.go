@@ -5,6 +5,7 @@ import "fmt"
 func printHello(ch chan int) {
 	fmt.Println("Hello from printHello")
 	ch <- 2
+	ch <- 3
 }
 
 func main() {
@@ -22,5 +23,7 @@ func main() {
 	i := <-ch
 	fmt.Println("Reeived ", i)
 
+	j := <-ch
+	fmt.Println("Reeived ", j)
 	<-ch
 }

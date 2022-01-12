@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en" itemscope itemtype="http://schema.org/WebPage">
+  <head>
+    
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <title>Understanding the context package in golang - Parikshit Agnihotry</title>
+  <meta name="description" content="
+
+  
+    
+      
+    
+    
+  
+
+
+The context package in go can come in handy while interacting with APIs and slow processes, especially in production-grade systems that serve web requests. Where, you might want to notify all the goroutines to stop work and return. Here is a basic tutorial on how you can use it in your projects with some best practices and gotchas.">
+  <meta name="author" content="Parikshit Agnihotry"/><script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "WebSite",
+    "name": "Parikshit Agnihotry",
+    
+    "url": "http:\/\/p.agnihotry.com"
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "name": "",
+  "url": "http:\/\/p.agnihotry.com"
+  
+  
+  
+  
+}
+</script>
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "item": {
+          "@id": "http:\/\/p.agnihotry.com",
+          "name": "home"
+        }
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "item": {
+          "@id": "http:\/\/p.agnihotry.com\/post\/understanding_the_context_package_in_golang\/",
+          "name": "Understanding the context package in golang"
+        }
+      }
+    ]
+  }
+</script>
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "Article",
+    "author": {
+      "name" : "Parikshit Agnihotry"
+    },
+    "headline": "Understanding the context package in golang",
+    "description" : "    The context package in go can come in handy while interacting with APIs and slow processes, especially in production-grade systems that serve web requests. Where, you might want to notify all the goroutines to stop work and return. Here is a basic tutorial on how you can use it in your projects with some best practices and gotchas.\n",
+    "inLanguage" : "en",
+    "wordCount":  2548 ,
+    "datePublished" : "2018-05-31T06:00:00",
+    "dateModified" : "2018-05-31T06:00:00",
+    "image" : "https:\/\/res.cloudinary.com\/pagnihotry\/image\/upload\/v1532622271\/pagnihotry\/avatar-icon.jpg",
+    "keywords" : [ "programming, golang" ],
+    "mainEntityOfPage" : "http:\/\/p.agnihotry.com\/post\/understanding_the_context_package_in_golang\/",
+    "publisher" : {
+      "@type": "Organization",
+      "name" : "http:\/\/p.agnihotry.com",
+      "logo" : {
+          "@type" : "ImageObject",
+          "url" : "https:\/\/res.cloudinary.com\/pagnihotry\/image\/upload\/v1532622271\/pagnihotry\/avatar-icon.jpg",
+          "height" :  60 ,
+          "width" :  60
+      }
+    }
+  }
+</script>
+
+
+<meta property="og:title" content="Understanding the context package in golang" />
+<meta property="og:description" content="
+
+  
+    
+      
+    
+    
+  
+
+
+The context package in go can come in handy while interacting with APIs and slow processes, especially in production-grade systems that serve web requests. Where, you might want to notify all the goroutines to stop work and return. Here is a basic tutorial on how you can use it in your projects with some best practices and gotchas.">
+<meta property="og:image" content="https://res.cloudinary.com/pagnihotry/image/upload/v1532622271/pagnihotry/avatar-icon.jpg" />
+<meta property="og:url" content="http://p.agnihotry.com/post/understanding_the_context_package_in_golang/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Parikshit Agnihotry" />
+
+  <meta name="twitter:title" content="Understanding the context package in golang" />
+  <meta name="twitter:description" content="
+
+  
+    
+      
+    
+    
+  
+
+
+The context package in go can come in handy while interacting with APIs and slow processes, especially in production-grade systems that serve web requests. Where, you …">
+  <meta name="twitter:image" content="https://res.cloudinary.com/pagnihotry/image/upload/v1532622271/pagnihotry/avatar-icon.jpg" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@ParikshitAgni" />
+  <meta name="twitter:creator" content="@ParikshitAgni" />
+  <link href='http://p.agnihotry.com/img/favicon.ico' rel='icon' type='image/x-icon'/>
+  <meta name="generator" content="Hugo 0.62.0-DEV" />
+  <link rel="alternate" href="http://p.agnihotry.com/index.xml" type="application/rss+xml" title="Parikshit Agnihotry"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"><link rel="stylesheet" href="http://p.agnihotry.com/css/main.css" /><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" />
+  <link rel="stylesheet" href="http://p.agnihotry.com/css/highlight.min.css" /><link rel="stylesheet" href="http://p.agnihotry.com/css/codeblock.css" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.css" integrity="sha384-h/L2W9KefUClHWaty3SLE5F/qvc4djlyR4qY3NUV5HGQBBW7stbcfff1+I/vmsHh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/default-skin/default-skin.min.css" integrity="sha384-iD0dNku6PYSIQLyfTOpB06F2KCZJAKLOThS5HRe8b3ibhdEQ6eKsFf/EeFxdOt5R" crossorigin="anonymous">
+<style>
+	code {
+		word-wrap: break-word;
+	}
+</style>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-71994912-3', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+  </head>
+  <body>
+    <nav class="navbar navbar-default navbar-fixed-top navbar-custom">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="http://p.agnihotry.com">Parikshit Agnihotry</a>
+    </div>
+
+    <div class="collapse navbar-collapse" id="main-navbar">
+      <ul class="nav navbar-nav navbar-right">
+        
+
+        
+
+        
+      </ul>
+    </div>
+
+    
+      <div class="avatar-container">
+        <div class="avatar-img-border">
+          <a title="Parikshit Agnihotry" href="http://p.agnihotry.com">
+            <img class="avatar-img" src="https://res.cloudinary.com/pagnihotry/image/upload/v1532622271/pagnihotry/avatar-icon.jpg" alt="Parikshit Agnihotry" />
+          </a>
+        </div>
+      </div>
+    
+
+  </div>
+</nav>
+
+
+
+
+    
+
+
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+<div class="pswp__bg"></div>
+
+<div class="pswp__scroll-wrap">
+    
+    <div class="pswp__container">
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+    </div>
+    
+    <div class="pswp__ui pswp__ui--hidden">
+    <div class="pswp__top-bar">
+      
+      <div class="pswp__counter"></div>
+      <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+      <button class="pswp__button pswp__button--share" title="Share"></button>
+      <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+      <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+      
+      
+      <div class="pswp__preloader">
+        <div class="pswp__preloader__icn">
+          <div class="pswp__preloader__cut">
+            <div class="pswp__preloader__donut"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+      <div class="pswp__share-tooltip"></div>
+    </div>
+    <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+    </button>
+    <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+    </button>
+    <div class="pswp__caption">
+      <div class="pswp__caption__center"></div>
+    </div>
+    </div>
+    </div>
+</div>
+
+
+  
+  
+  
+
+
+
+
+
+
+  
+
+  <header class="header-section ">
+    
+    <div class="intro-header no-img">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <div class="post-heading">
+              
+                <h1>Understanding the context package in golang</h1>
+              
+              
+              
+              
+                <span class="post-meta">
+  
+  
+  <i class="fas fa-calendar"></i>&nbsp;Posted on May 31, 2018
+  
+  
+    &nbsp;|&nbsp;<i class="fas fa-clock"></i>&nbsp;12&nbsp;minutes
+  
+  
+  
+    
+      &nbsp;|&nbsp;<i class="fas fa-user"></i>&nbsp;Parikshit Agnihotry
+    
+  
+  
+</span>
+
+
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+
+    
+<div class="container" role="main">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+      <article role="main" class="blog-post">
+        <link rel="stylesheet" href="http://p.agnihotry.com/css/hugo-easy-gallery.css" />
+<div class="box" >
+  <figure  itemprop="associatedMedia" itemscope itemtype="http://schema.org/ImageObject">
+    <div class="img">
+      <img itemprop="thumbnail" src="https://res.cloudinary.com/pagnihotry/image/upload/v1532622064/pagnihotry/Go-Logo_Blue-trimmed.jpg" alt="https://res.cloudinary.com/pagnihotry/image/upload/v1532622064/pagnihotry/Go-Logo_Blue-trimmed.jpg"/>
+    </div>
+    <a href="https://res.cloudinary.com/pagnihotry/image/upload/v1532622064/pagnihotry/Go-Logo_Blue-trimmed.jpg" itemprop="contentUrl"></a>
+  </figure>
+</div>
+
+<p>The context package in go can come in handy while interacting with APIs and slow processes, especially in production-grade systems that serve web requests. Where, you might want to notify all the goroutines to stop work and return. Here is a basic tutorial on how you can use it in your projects with some best practices and gotchas.</p>
+<h1 id="prerequisites">Prerequisites</h1>
+<p>For understanding the context package there are 2 concepts that you should be familiar with.</p>
+<ol>
+<li>goroutine</li>
+<li>channels</li>
+</ol>
+<p>I will try to briefly cover these before moving on to context, if you are already familiar with these, you can move on directly to the Context section.</p>
+<h2 id="goroutine">Goroutine</h2>
+<p>From the official go documentation: &ldquo;A goroutine is a lightweight thread of execution&rdquo;. Goroutines are lighter than a thread so managing them is comparatively less resource intensive.</p>
+<p>Playground: <a href="https://play.golang.org/p/-TDMgnkJRY6">https://play.golang.org/p/-TDMgnkJRY6</a></p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go">  <span class="kn">package</span> <span class="nx">main</span>
+
+  <span class="kn">import</span> <span class="s">&#34;fmt&#34;</span>
+  
+  <span class="c1">//function to print hello
+</span><span class="c1"></span>  <span class="kd">func</span> <span class="nf">printHello</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Hello from printHello&#34;</span><span class="p">)</span>
+  <span class="p">}</span>
+
+  <span class="kd">func</span> <span class="nf">main</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">//inline goroutine. Define a function inline and then call it.
+</span><span class="c1"></span>    <span class="k">go</span> <span class="kd">func</span><span class="p">(</span><span class="p">)</span><span class="p">{</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Hello inline&#34;</span><span class="p">)</span><span class="p">}</span><span class="p">(</span><span class="p">)</span>
+    <span class="c1">//call a function as goroutine
+</span><span class="c1"></span>    <span class="k">go</span> <span class="nf">printHello</span><span class="p">(</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Hello from main&#34;</span><span class="p">)</span>
+  <span class="p">}</span>
+
+</code></pre></div><p>If you run the above program, you may only see it print out <code>Hello from main</code> that is because it fires up couple goroutines and the <code>main</code> function exits before any of them complete. To make sure <code>main</code> waits for the goroutines to complete, you will need some way for the goroutines to tell it that they are done executing, that's where channels can help us.</p>
+<h2 id="channels">Channels</h2>
+<p>These are the communication channels between goroutines. Channels are used when you want to pass in results or errors or any other kind of information from one goroutine to another. Channels have types, there can be a channel of type <code>int</code> to receive integers or <code>error</code> to receive errors, etc.</p>
+<p>Say there is a channel <code>ch</code> of type <code>int</code>  If you want to send something to a channel, the syntax is <code>ch &lt;- 1</code> if you want to receive something from the channel it will be <code>var := &lt;- ch</code>. This recieves from the channel and stores the value in <code>var</code>.</p>
+<p>The following program illustrates the use of channels to make sure the goroutines complete and return a value from them to main.</p>
+<p><em>Note: Wait groups (<a href="https://golang.org/pkg/sync/#WaitGroup">https://golang.org/pkg/sync/#WaitGroup</a>) can also be used for synchronization, but since we discuss channels later on in the context section, I am picking them in my code samples for this blog post</em></p>
+<p>Playground: <a href="https://play.golang.org/p/3zfQMox5mHn">https://play.golang.org/p/3zfQMox5mHn</a></p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go">  <span class="kn">package</span> <span class="nx">main</span>
+
+  <span class="kn">import</span> <span class="s">&#34;fmt&#34;</span>
+  
+  <span class="c1">//prints to stdout and puts an int on channel
+</span><span class="c1"></span>  <span class="kd">func</span> <span class="nf">printHello</span><span class="p">(</span><span class="nx">ch</span> <span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Hello from printHello&#34;</span><span class="p">)</span>
+    <span class="c1">//send a value on channel
+</span><span class="c1"></span>    <span class="nx">ch</span> <span class="o">&lt;-</span> <span class="mi">2</span>
+  <span class="p">}</span>
+
+  <span class="kd">func</span> <span class="nf">main</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">//make a channel. You need to use the make function to create channels.
+</span><span class="c1"></span>    <span class="c1">//channels can also be buffered where you can specify size. eg: ch := make(chan int, 2)
+</span><span class="c1"></span>    <span class="c1">//that is out of the scope of this post.
+</span><span class="c1"></span>    <span class="nx">ch</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span>
+    <span class="c1">//inline goroutine. Define a function and then call it.
+</span><span class="c1"></span>    <span class="c1">//write on a channel when done
+</span><span class="c1"></span>    <span class="k">go</span> <span class="kd">func</span><span class="p">(</span><span class="p">)</span><span class="p">{</span>
+      <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Hello inline&#34;</span><span class="p">)</span>
+      <span class="c1">//send a value on channel
+</span><span class="c1"></span>      <span class="nx">ch</span> <span class="o">&lt;-</span> <span class="mi">1</span>
+    <span class="p">}</span><span class="p">(</span><span class="p">)</span>
+    <span class="c1">//call a function as goroutine
+</span><span class="c1"></span>    <span class="k">go</span> <span class="nf">printHello</span><span class="p">(</span><span class="nx">ch</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Hello from main&#34;</span><span class="p">)</span>
+
+    <span class="c1">//get first value from channel.
+</span><span class="c1"></span>    <span class="c1">//and assign to a variable to use this value later
+</span><span class="c1"></span>    <span class="c1">//here that is to print it
+</span><span class="c1"></span>    <span class="nx">i</span> <span class="o">:=</span> <span class="o">&lt;-</span> <span class="nx">ch</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Recieved &#34;</span><span class="p">,</span><span class="nx">i</span><span class="p">)</span>
+    <span class="c1">//get the second value from channel
+</span><span class="c1"></span>    <span class="c1">//do not assign it to a variable because we dont want to use that
+</span><span class="c1"></span>    <span class="o">&lt;-</span> <span class="nx">ch</span>
+  <span class="p">}</span>
+</code></pre></div><h1 id="context">Context</h1>
+<p>A way to think about context package in go is that it allows you to pass in a “context” to your program. Context like a timeout or deadline or a channel to indicate stop working and return. For instance, if you are doing a web request or running a system command, it is usually a good idea to have a timeout for production-grade systems. Because, if an API you depend on is running slow, you would not want to back up requests on your system, because, it may end up increasing the load and degrading the performance of all the requests you serve. Resulting in a cascading effect. This is where a timeout or deadline context can come in handy.</p>
+<h2 id="creating-context">Creating context</h2>
+<p>The context package allows creating and deriving context in following ways:</p>
+<h3 id="contextbackground-ctx-context">context.Background() ctx Context</h3>
+<p>This function returns an empty context. This should be only used at a high level (in main or the top level request handler). This can be used to derive other contexts that we discuss later.</p>
+<p><code>ctx, cancel := context.Background()</code></p>
+<h3 id="contexttodo-ctx-context">context.TODO() ctx Context</h3>
+<p>This function also creates an empty context. This should also be only used at a high level or when you are not sure what context to use or if the function has not been updated to receive a context. Which means you (or the maintainer) plans to add context to the function in future.</p>
+<p><code>ctx, cancel := context.TODO()</code></p>
+<p>Interestingly, looking at the code (<a href="https://golang.org/src/context/context.go),">https://golang.org/src/context/context.go),</a> it is exactly same as background. The difference is, this can be used by static analysis tools to validate if the context is being passed around properly, which is an important detail, as the static analysis tools can help surface potential bugs early on, and can be hooked up in a CI/CD pipeline.</p>
+<p>From <a href="https://golang.org/src/context/context.go:">https://golang.org/src/context/context.go:</a></p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">var</span> <span class="p">(</span>
+   <span class="nx">background</span> <span class="p">=</span> <span class="nb">new</span><span class="p">(</span><span class="nx">emptyCtx</span><span class="p">)</span>
+   <span class="nx">todo</span>       <span class="p">=</span> <span class="nb">new</span><span class="p">(</span><span class="nx">emptyCtx</span><span class="p">)</span>
+<span class="p">)</span>
+</code></pre></div><h3 id="contextwithvalueparent-context-key-val-interface">context.WithValue(parent Context, key, val interface</h3>
+<p>This function takes in a context and returns a derived context where value <code>val</code> is associated with <code>key</code> and flows through the context tree with the context. This means that once you get a context with value, any context that derives from this gets this value. It is not recommended to pass in critical parameters using context value, instead, functions should accept those values in the signature making it explicit.</p>
+<p><code>ctx := context.WithValue(context.Background(), key, &quot;test&quot;)</code></p>
+<h3 id="contextwithcancelparent-context-ctx-context-cancel-cancelfunc">context.WithCancel(parent Context) (ctx Context, cancel CancelFunc)</h3>
+<p>This is where it starts to get a little interesting. This function creates a new context derived from the parent context that is passed in. The parent can be a background context or a context that was passed into the function.</p>
+<p>This returns a derived context and the cancel function. Only the function that creates this should call the cancel function to cancel this context. You can pass around the cancel function if you wanted to, but, that is highly not recommended. This can lead to the invoker of cancel not realizing what the downstream impact of canceling the context may be. There may be other contexts that are derived from this which may cause the program to behave in an unexpected fashion. In short, <strong>NEVER</strong> pass around the cancel function.</p>
+<p><code>ctx, cancel := context.WithCancel(context.Background())</code></p>
+<h3 id="contextwithdeadlineparent-context-d-timetime-ctx-context-cancel-cancelfunc">context.WithDeadline(parent Context, d time.Time) (ctx Context, cancel CancelFunc)</h3>
+<p>This function returns a derived context from its parent that gets cancelled when the deadline exceeds or cancel function is called. For example, you can create a context that will automatically get canceled at a certain time in future and pass that around in child functions. When that context gets canceled because of deadline running out, all the functions that got the context get notified to stop work and return.</p>
+<p><code>ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(2 * time.Second))</code></p>
+<h3 id="contextwithtimeoutparent-context-timeout-timeduration-ctx-context-cancel-cancelfunc">context.WithTimeout(parent Context, timeout time.Duration) (ctx Context, cancel CancelFunc)</h3>
+<p>This function is similar to <code>context.WithDeadline</code>. The difference is that it takes in time duration as an input instead of the time object. This function returns a derived context that gets canceled if the cancel function is called or the timeout duration is exceeded.</p>
+<p><code>ctx, cancel := context.WithTimeout(context.Background(), time.Duration(150)*time.Millisecond)</code></p>
+<h2 id="accepting-and-using-contexts-in-your-functions">Accepting and using contexts in your functions</h2>
+<p>Now that we know how to create the contexts (Background and TODO) and how to derive contexts (WithValue, WithCancel, Deadline, and Timeout), let's discuss how to use them.</p>
+<p>In the following example, you can see a function accepting context starts a goroutine and waits for that goroutine to return or that context to cancel. The select statement helps us to pick whatever case happens first and return.</p>
+<p><code>&lt;-ctx.Done()</code> once the Done channel is closed, the <code>case &lt;-ctx.Done():</code> is selected. Once this happens, the function should abandon work and prepare to return. That means you should close any open pipes, free resources and return form the function. There are cases when freeing up resources can hold up the return, like doing some clean up that hangs, etc. You should look out for any such possibilities while handling the context return.</p>
+<p>An example that follows this section has a full go program that illustrates timeout and the cancel functions.</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">//Function that does slow processing with a context
+</span><span class="c1"></span><span class="c1">//Note that context is the first argument
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">sleepRandomContext</span><span class="p">(</span><span class="nx">ctx</span> <span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span> <span class="nx">ch</span> <span class="kd">chan</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="c1">//Cleanup tasks
+</span><span class="c1"></span>  <span class="c1">//There are no contexts being created here
+</span><span class="c1"></span>  <span class="c1">//Hence, no canceling needed
+</span><span class="c1"></span>  <span class="k">defer</span> <span class="kd">func</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;sleepRandomContext complete&#34;</span><span class="p">)</span>
+    <span class="nx">ch</span> <span class="o">&lt;-</span> <span class="kc">true</span>
+  <span class="p">}</span><span class="p">(</span><span class="p">)</span>
+
+  <span class="c1">//Make a channel
+</span><span class="c1"></span>  <span class="nx">sleeptimeChan</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span>
+
+  <span class="c1">//Start slow processing in a goroutine
+</span><span class="c1"></span>  <span class="c1">//Send a channel for communication
+</span><span class="c1"></span>  <span class="k">go</span> <span class="nf">sleepRandom</span><span class="p">(</span><span class="s">&#34;sleepRandomContext&#34;</span><span class="p">,</span> <span class="nx">sleeptimeChan</span><span class="p">)</span>
+
+  <span class="c1">//Use a select statement to exit out if context expires
+</span><span class="c1"></span>  <span class="k">select</span> <span class="p">{</span>
+  <span class="k">case</span> <span class="o">&lt;-</span><span class="nx">ctx</span><span class="p">.</span><span class="nf">Done</span><span class="p">(</span><span class="p">)</span><span class="p">:</span>
+    <span class="c1">//If context expires, this case is selected
+</span><span class="c1"></span>    <span class="c1">//Free up resources that may no longer be needed because of aborting the work
+</span><span class="c1"></span>    <span class="c1">//Signal all the goroutines that should stop work (use channels)
+</span><span class="c1"></span>    <span class="c1">//Usually, you would send something on channel,
+</span><span class="c1"></span>    <span class="c1">//wait for goroutines to exit and then return
+</span><span class="c1"></span>    <span class="c1">//Or, use wait groups instead of channels for synchronization
+</span><span class="c1"></span>    <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Time to return&#34;</span><span class="p">)</span>
+  <span class="k">case</span> <span class="nx">sleeptime</span> <span class="o">:=</span> <span class="o">&lt;-</span><span class="nx">sleeptimeChan</span><span class="p">:</span>
+    <span class="c1">//This case is selected when processing finishes before the context is cancelled
+</span><span class="c1"></span>    <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Slept for &#34;</span><span class="p">,</span> <span class="nx">sleeptime</span><span class="p">,</span> <span class="s">&#34;ms&#34;</span><span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div><h2 id="example">Example</h2>
+<p>So far we have seen that using contexts you can set a deadline, timeout, or call the cancel function to notify all the functions that use any derived context to stop work and return. Here is an example of how it may work:</p>
+<ul>
+<li><code>main</code> function:
+<ul>
+<li>Creates a context with cancel</li>
+<li>Calls cancel function after a random timeout</li>
+</ul>
+</li>
+<li><code>doWorkContext</code> function
+<ul>
+<li>Derives a timeout context</li>
+<li>This context will be canceled when
+<ul>
+<li>main calls cancelFunction or</li>
+<li>Timeout elapses or</li>
+<li>doWorkContext calls its cancelFunction</li>
+</ul>
+</li>
+<li>Starts a goroutine to do some slow processing passing the derived context</li>
+<li>Waits for the goroutine to complete or context to be canceled by <code>main</code> whichever happens first</li>
+</ul>
+</li>
+<li><code>sleepRandomContext</code> function
+<ul>
+<li>Starts a goroutine to do the slow processing</li>
+<li>Waits for the goroutine to complete or,</li>
+<li>Waits for the context to be canceled by main, timeout or a cancel call to its own cancelFunction</li>
+</ul>
+</li>
+<li><code>sleepRandom</code> function
+<ul>
+<li>Sleeps for random amount of time</li>
+<li>This example uses sleep to simulate random processing times, in a real-world example you may use channels to signal this function to start cleanup and wait on a channel for it to confirm that cleanup is complete.</li>
+</ul>
+</li>
+</ul>
+<p>Playground: <a href="https://play.golang.org/p/grQAUN3MBlg">https://play.golang.org/p/grQAUN3MBlg</a> <em>(Looks like random seed I use, time, in playground is not really changing. You may have to executing this in your local machine to see randomness)</em></p>
+<p>Github: <a href="https://github.com/pagnihotry/golang_samples/blob/master/go_context_sample.go">https://github.com/pagnihotry/golang_samples/blob/master/go_context_sample.go</a></p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">main</span>
+
+<span class="kn">import</span> <span class="p">(</span>
+  <span class="s">&#34;context&#34;</span>
+  <span class="s">&#34;fmt&#34;</span>
+  <span class="s">&#34;math/rand&#34;</span>
+  <span class="s">&#34;time&#34;</span>
+<span class="p">)</span>
+
+<span class="c1">//Slow function
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">sleepRandom</span><span class="p">(</span><span class="nx">fromFunction</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">ch</span> <span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">//defer cleanup
+</span><span class="c1"></span>  <span class="k">defer</span> <span class="kd">func</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span> <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="nx">fromFunction</span><span class="p">,</span> <span class="s">&#34;sleepRandom complete&#34;</span><span class="p">)</span> <span class="p">}</span><span class="p">(</span><span class="p">)</span>
+
+  <span class="c1">//Perform a slow task
+</span><span class="c1"></span>  <span class="c1">//For illustration purpose,
+</span><span class="c1"></span>  <span class="c1">//Sleep here for random ms
+</span><span class="c1"></span>  <span class="nx">seed</span> <span class="o">:=</span> <span class="nx">time</span><span class="p">.</span><span class="nf">Now</span><span class="p">(</span><span class="p">)</span><span class="p">.</span><span class="nf">UnixNano</span><span class="p">(</span><span class="p">)</span>
+  <span class="nx">r</span> <span class="o">:=</span> <span class="nx">rand</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="nx">rand</span><span class="p">.</span><span class="nf">NewSource</span><span class="p">(</span><span class="nx">seed</span><span class="p">)</span><span class="p">)</span>
+  <span class="nx">randomNumber</span> <span class="o">:=</span> <span class="nx">r</span><span class="p">.</span><span class="nf">Intn</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+  <span class="nx">sleeptime</span> <span class="o">:=</span> <span class="nx">randomNumber</span> <span class="o">+</span> <span class="mi">100</span>
+  <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="nx">fromFunction</span><span class="p">,</span> <span class="s">&#34;Starting sleep for&#34;</span><span class="p">,</span> <span class="nx">sleeptime</span><span class="p">,</span> <span class="s">&#34;ms&#34;</span><span class="p">)</span>
+  <span class="nx">time</span><span class="p">.</span><span class="nf">Sleep</span><span class="p">(</span><span class="nx">time</span><span class="p">.</span><span class="nf">Duration</span><span class="p">(</span><span class="nx">sleeptime</span><span class="p">)</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Millisecond</span><span class="p">)</span>
+  <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="nx">fromFunction</span><span class="p">,</span> <span class="s">&#34;Waking up, slept for &#34;</span><span class="p">,</span> <span class="nx">sleeptime</span><span class="p">,</span> <span class="s">&#34;ms&#34;</span><span class="p">)</span>
+
+  <span class="c1">//write on the channel if it was passed in
+</span><span class="c1"></span>  <span class="k">if</span> <span class="nx">ch</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+    <span class="nx">ch</span> <span class="o">&lt;-</span> <span class="nx">sleeptime</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">//Function that does slow processing with a context
+</span><span class="c1"></span><span class="c1">//Note that context is the first argument
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">sleepRandomContext</span><span class="p">(</span><span class="nx">ctx</span> <span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span> <span class="nx">ch</span> <span class="kd">chan</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="c1">//Cleanup tasks
+</span><span class="c1"></span>  <span class="c1">//There are no contexts being created here
+</span><span class="c1"></span>  <span class="c1">//Hence, no canceling needed
+</span><span class="c1"></span>  <span class="k">defer</span> <span class="kd">func</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;sleepRandomContext complete&#34;</span><span class="p">)</span>
+    <span class="nx">ch</span> <span class="o">&lt;-</span> <span class="kc">true</span>
+  <span class="p">}</span><span class="p">(</span><span class="p">)</span>
+
+  <span class="c1">//Make a channel
+</span><span class="c1"></span>  <span class="nx">sleeptimeChan</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span>
+
+  <span class="c1">//Start slow processing in a goroutine
+</span><span class="c1"></span>  <span class="c1">//Send a channel for communication
+</span><span class="c1"></span>  <span class="k">go</span> <span class="nf">sleepRandom</span><span class="p">(</span><span class="s">&#34;sleepRandomContext&#34;</span><span class="p">,</span> <span class="nx">sleeptimeChan</span><span class="p">)</span>
+
+  <span class="c1">//Use a select statement to exit out if context expires
+</span><span class="c1"></span>  <span class="k">select</span> <span class="p">{</span>
+  <span class="k">case</span> <span class="o">&lt;-</span><span class="nx">ctx</span><span class="p">.</span><span class="nf">Done</span><span class="p">(</span><span class="p">)</span><span class="p">:</span>
+    <span class="c1">//If context is cancelled, this case is selected
+</span><span class="c1"></span>    <span class="c1">//This can happen if the timeout doWorkContext expires or
+</span><span class="c1"></span>    <span class="c1">//doWorkContext calls cancelFunction or main calls cancelFunction
+</span><span class="c1"></span>    <span class="c1">//Free up resources that may no longer be needed because of aborting the work
+</span><span class="c1"></span>    <span class="c1">//Signal all the goroutines that should stop work (use channels)
+</span><span class="c1"></span>    <span class="c1">//Usually, you would send something on channel, 
+</span><span class="c1"></span>    <span class="c1">//wait for goroutines to exit and then return
+</span><span class="c1"></span>    <span class="c1">//Or, use wait groups instead of channels for synchronization
+</span><span class="c1"></span>    <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;sleepRandomContext: Time to return&#34;</span><span class="p">)</span>
+  <span class="k">case</span> <span class="nx">sleeptime</span> <span class="o">:=</span> <span class="o">&lt;-</span><span class="nx">sleeptimeChan</span><span class="p">:</span>
+    <span class="c1">//This case is selected when processing finishes before the context is cancelled
+</span><span class="c1"></span>    <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Slept for &#34;</span><span class="p">,</span> <span class="nx">sleeptime</span><span class="p">,</span> <span class="s">&#34;ms&#34;</span><span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">//A helper function, this can, in the real world do various things.
+</span><span class="c1"></span><span class="c1">//In this example, it is just calling one function.
+</span><span class="c1"></span><span class="c1">//Here, this could have just lived in main
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">doWorkContext</span><span class="p">(</span><span class="nx">ctx</span> <span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="c1">//Derive a timeout context from context with cancel
+</span><span class="c1"></span>  <span class="c1">//Timeout in 150 ms
+</span><span class="c1"></span>  <span class="c1">//All the contexts derived from this will returns in 150 ms
+</span><span class="c1"></span>  <span class="nx">ctxWithTimeout</span><span class="p">,</span> <span class="nx">cancelFunction</span> <span class="o">:=</span> <span class="nx">context</span><span class="p">.</span><span class="nf">WithTimeout</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">time</span><span class="p">.</span><span class="nf">Duration</span><span class="p">(</span><span class="mi">150</span><span class="p">)</span><span class="o">*</span><span class="nx">time</span><span class="p">.</span><span class="nx">Millisecond</span><span class="p">)</span>
+
+  <span class="c1">//Cancel to release resources once the function is complete
+</span><span class="c1"></span>  <span class="k">defer</span> <span class="kd">func</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;doWorkContext complete&#34;</span><span class="p">)</span>
+    <span class="nf">cancelFunction</span><span class="p">(</span><span class="p">)</span>
+  <span class="p">}</span><span class="p">(</span><span class="p">)</span>
+
+  <span class="c1">//Make channel and call context function
+</span><span class="c1"></span>  <span class="c1">//Can use wait groups as well for this particular case
+</span><span class="c1"></span>  <span class="c1">//As we do not use the return value sent on channel
+</span><span class="c1"></span>  <span class="nx">ch</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">bool</span><span class="p">)</span>
+  <span class="k">go</span> <span class="nf">sleepRandomContext</span><span class="p">(</span><span class="nx">ctxWithTimeout</span><span class="p">,</span> <span class="nx">ch</span><span class="p">)</span>
+
+  <span class="c1">//Use a select statement to exit out if context expires
+</span><span class="c1"></span>  <span class="k">select</span> <span class="p">{</span>
+  <span class="k">case</span> <span class="o">&lt;-</span><span class="nx">ctx</span><span class="p">.</span><span class="nf">Done</span><span class="p">(</span><span class="p">)</span><span class="p">:</span>
+    <span class="c1">//This case is selected when the passed in context notifies to stop work
+</span><span class="c1"></span>    <span class="c1">//In this example, it will be notified when main calls cancelFunction
+</span><span class="c1"></span>    <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;doWorkContext: Time to return&#34;</span><span class="p">)</span>
+  <span class="k">case</span> <span class="o">&lt;-</span><span class="nx">ch</span><span class="p">:</span>
+    <span class="c1">//This case is selected when processing finishes before the context is cancelled
+</span><span class="c1"></span>    <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;sleepRandomContext returned&#34;</span><span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">main</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">//Make a background context
+</span><span class="c1"></span>  <span class="nx">ctx</span> <span class="o">:=</span> <span class="nx">context</span><span class="p">.</span><span class="nf">Background</span><span class="p">(</span><span class="p">)</span>
+  <span class="c1">//Derive a context with cancel
+</span><span class="c1"></span>  <span class="nx">ctxWithCancel</span><span class="p">,</span> <span class="nx">cancelFunction</span> <span class="o">:=</span> <span class="nx">context</span><span class="p">.</span><span class="nf">WithCancel</span><span class="p">(</span><span class="nx">ctx</span><span class="p">)</span>
+
+  <span class="c1">//defer canceling so that all the resources are freed up 
+</span><span class="c1"></span>  <span class="c1">//For this and the derived contexts
+</span><span class="c1"></span>  <span class="k">defer</span> <span class="kd">func</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Main Defer: canceling context&#34;</span><span class="p">)</span>
+    <span class="nf">cancelFunction</span><span class="p">(</span><span class="p">)</span>
+  <span class="p">}</span><span class="p">(</span><span class="p">)</span>
+
+  <span class="c1">//Cancel context after a random time
+</span><span class="c1"></span>  <span class="c1">//This cancels the request after a random timeout
+</span><span class="c1"></span>  <span class="c1">//If this happens, all the contexts derived from this should return
+</span><span class="c1"></span>  <span class="k">go</span> <span class="kd">func</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nf">sleepRandom</span><span class="p">(</span><span class="s">&#34;Main&#34;</span><span class="p">,</span> <span class="kc">nil</span><span class="p">)</span>
+    <span class="nf">cancelFunction</span><span class="p">(</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Main Sleep complete. canceling context&#34;</span><span class="p">)</span>
+  <span class="p">}</span><span class="p">(</span><span class="p">)</span>
+  <span class="c1">//Do work
+</span><span class="c1"></span>  <span class="nf">doWorkContext</span><span class="p">(</span><span class="nx">ctxWithCancel</span><span class="p">)</span>
+<span class="p">}</span>
+
+</code></pre></div><h2 id="gotchas">Gotchas</h2>
+<p>If a function takes in a context, make sure you check on how it respects the cancel notification. For instance, the <code>exec.CommandContext</code> does not close the reader pipe till the command has executed all the forks that a process created (Github issue: <a href="https://github.com/golang/go/issues/23019),">https://github.com/golang/go/issues/23019),</a> which means that the context cancellation will not make this function return right away if you are waiting on <code>cmd.Wait()</code> until all forks of the external command have completed processing. If you used a timeout or deadline with a max execution time, you may see this not working as expected. If you run into any such issues, you can implement timeouts using <code>time.After</code>.</p>
+<h2 id="best-practices">Best practices</h2>
+<ol>
+<li>context.Background should be used only at the highest level, as the root of all derived contexts</li>
+<li>context.TODO should be used where not sure what to use or if the current function will be updated to use context in future</li>
+<li>context cancelations are advisory, the functions may take time to clean up and exit</li>
+<li>context.Value should be used very rarely, it should never be used to pass in optional parameters. This makes the API implicit and can introduce bugs. Instead, such values should be passed in as arguments.</li>
+<li>Don’t store contexts in a struct, pass them explicitly in functions, preferably, as the first argument.</li>
+<li>Never pass nil context, instead, use a TODO if you are not sure what to use.</li>
+<li>The <code>Context</code> struct does not have a cancel method because only the function that derives the context should cancel it.</li>
+</ol>
+
+        
+          <div class="blog-tags">
+            
+              <a href="http://p.agnihotry.com/tags/programming/">programming</a>&nbsp;
+            
+              <a href="http://p.agnihotry.com/tags/golang/">golang</a>&nbsp;
+            
+          </div>
+        
+
+        
+
+        
+      </article>
+
+      
+        <ul class="pager blog-pager">
+          
+            <li class="previous">
+              <a href="http://p.agnihotry.com/post/infrastructure_as_code_terraform/" data-toggle="tooltip" data-placement="top" title="Terraform your Infrastructure!">&larr; Previous Post</a>
+            </li>
+          
+          
+            <li class="next">
+              <a href="http://p.agnihotry.com/post/the_free_stack_aws/" data-toggle="tooltip" data-placement="top" title="The Free Stack - Running your application for free on AWS">Next Post &rarr;</a>
+            </li>
+          
+        </ul>
+      
+
+
+      
+        
+        
+      
+
+    </div>
+  </div>
+</div>
+
+      
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center footer-links">
+          
+              <li>
+                <a href="https://twitter.com/ParikshitAgni" title="Twitter">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a href="https://linkedin.com/in/parikshitagnihotry" title="LinkedIn">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-linkedin fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+          
+          <li>
+            <a href="" title="RSS">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+        </ul>
+        <p class="credits copyright text-muted">
+          
+            
+              Parikshit Agnihotry
+            
+          
+
+          &nbsp;&bull;&nbsp;&copy;
+          
+            2021
+          
+
+          
+            &nbsp;&bull;&nbsp;
+            <a href="http://p.agnihotry.com">Parikshit Agnihotry</a>
+          
+        </p>
+        
+        <p class="credits theme-by text-muted">
+          <a href="https://gohugo.io">Hugo v0.62.0-DEV</a> powered &nbsp;&bull;&nbsp; Theme <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a> adapted from <a href="https://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a>
+          
+        </p>
+      </div>
+    </div>
+  </div>
+</footer><script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="http://p.agnihotry.com/js/main.js"></script>
+<script src="http://p.agnihotry.com/js/highlight.min.js"></script>
+<script> hljs.initHighlightingOnLoad(); </script>
+<script> $(document).ready(function() {$("pre.chroma").css("padding","0");}); </script><script> renderMathInElement(document.body); </script><script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.js" integrity="sha384-QELNnmcmU8IR9ZAykt67vGr9/rZJdHbiWi64V88fCPaOohUlHCqUD/unNN0BXSqy" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe-ui-default.min.js" integrity="sha384-m67o7SkQ1ALzKZIFh4CiTA8tmadaujiTa9Vu+nqPSwDOqHrDmxLezTdFln8077+q" crossorigin="anonymous"></script><script src="http://p.agnihotry.com/js/load-photoswipe.js"></script>
+
+
+
+
+
+
+
+
+
+    
+  </body>
+</html>
+

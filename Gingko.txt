@@ -1,0 +1,20 @@
+Gingko
+Gomega
+22/02/2022
+
+
+
+BDD
+https://en.wikipedia.org/wiki/Behavior-driven_development
+
+Given-when-then
+
+Given [initial contenxt] when [event occurs] then [ensure some outcomes]
+
+
+
+https://utkarshmani1997.medium.com/unit-testing-with-ginkgo-part-1-be7acc6c84c6
+
+
+gingko bootstrap
+gingko generate filename

@@ -1,0 +1,7 @@
+API server listening at: 127.0.0.1:38499
+client
+panic: Get "http://127.0.0.1:8989": context deadline exceeded
+
+goroutine 1 [running]:
+main.main()
+        /home/stevepro/GitHub/StevePro7/GoLangTesting/ContextTutorials/02-PacticalExamples/02-Test/Client/client.go:28 +0x3b7

@@ -27,6 +27,7 @@ Table driven tests
 https://github.com/golang/go/wiki/TableDrivenTests
 
 
+01.
 Stack Overflow
 fake.New
 k8s.io/client-go/kubernetes/fake
@@ -39,3 +40,15 @@ real client-go
 config, err := rest.InClusterConfig()
 
 
+
+
+02.
+https://medium.com/@e_frogers/unit-testing-with-kubernetes-client-go-283b11aaa7db
+_, err := k.Client.CoreV1().Namespaces().Create(ns)
+
+similar code in
+infra_k8s.go
+
+k8s.io/client-go/kubernetes/fake
+proxy_test.go
+_, err = proxy.New(fake.NewSimpleClientset(), nil, "testnode")

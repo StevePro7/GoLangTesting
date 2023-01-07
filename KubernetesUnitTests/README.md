@@ -99,4 +99,14 @@ https://medium.com/programming-kubernetes/building-stuff-with-the-kubernetes-api
 https://medium.com/programming-kubernetes/building-stuff-with-the-kubernetes-api-part-4-using-go-b1d0e3c1c899
 
 
+04.
+Thomas Stringer
+Unit Testing Kubernetes Resources with Go
+https://trstringer.com/unit-test-kubernetes-resources-go
+
+references this article as a pre-req
+Connect to Kubernetes from Go
+https://trstringer.com/connect-to-kubernetes-from-go
+
+k8s.io/client-go/kubernetes/fake
 

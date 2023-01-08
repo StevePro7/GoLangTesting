@@ -11,27 +11,3 @@ spec:
     image: "ubuntu:focal"
     command: ["/bin/bash"]
     args: ["-c", "sleep infinity"]
-    resources:
-      limits:
-        cpu: 200m
-        memory: 500Mi
-      requests:
-        cpu: 100m
-        memory: 200Mi
-    env:
-    - name: DB_HOST
-      valueFrom:
-        configMapKeyRef:
-          name: testpod1
-          key: DB_HOST
-    ports:
-    - containerPort:  80
-      name:  http
-    volumeMounts:
-    - name: localtime
-      mountPath: /etc/localtime
-  volumes:
-    - name: localtime
-      hostPath:
-        path: /usr/share/zoneinfo/Asia/Shanghai
-  restartPolicy: Always

@@ -4,7 +4,7 @@ metadata:
   name: "testpod1"
   namespace: default
   labels:
-    app: "testpod1"
+    hello: "world"
 spec:
   containers:
   - name: testpod1

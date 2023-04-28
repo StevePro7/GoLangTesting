@@ -1,4 +1,30 @@
 Gingko Unit Testing
+28/04/2023
+
+Official docs
+https://onsi.github.io/ginkgo
+
+Container node
+Describe, Context, When
+
+Setup node
+BeforeEach()
+
+Subject node
+It()
+
+
+Closures
+https://en.wikipedia.org/wiki/Closure_(computer_programming
+
+Describe(name, func() {})
+In programming languages, a closure [of function closure], is a
+technique for implementing lexically scoped name binding in a 
+language with first-class functions.
+Operationally, a closure is a record storing a function together
+with an environment
+
+
 02/10/2021
 
 Gingko

@@ -20,11 +20,14 @@ func main() {
 		fmt.Println()
 		fmt.Printf("sgb goroutine:'%s'\n", sig)
 		// send true to the done channel
-		done <- true
-		//close(done)
+		//done <- false
+		//done <- true
+		close(done) // false
 	}()
 
 	fmt.Println("awaiting signal")
-	<-done
-	fmt.Println("exiting")
+	// block!!
+	// receive bool from the done channel
+	ch := <-done
+	fmt.Printf("exiting [%v]", ch)
 }

@@ -14,20 +14,17 @@ func main() {
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 
 	done := make(chan bool, 1)
-
 	go func() {
 		sig := <-sigs
 		fmt.Println()
 		fmt.Printf("sgb goroutine:'%s'\n", sig)
 		// send true to the done channel
-		//done <- false
-		//done <- true
-		close(done) // false
+		done <- true
 	}()
 
 	fmt.Println("awaiting signal")
 	// block!!
 	// receive bool from the done channel
-	ch := <-done
-	fmt.Printf("exiting [%v]", ch)
+	<-done
+	fmt.Println("exiting")
 }

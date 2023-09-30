@@ -25,5 +25,4 @@ func main() {
 	Ticker.Stop()
 	mychannel <- true
 	fmt.Println("the end")
-	fmt.Println("the end2")
 }

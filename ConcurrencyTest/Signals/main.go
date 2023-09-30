@@ -16,6 +16,7 @@ func main() {
 	done := make(chan bool, 1)
 	go func() {
 		sig := <-sigs
+		fmt.Printf("inp goroutine:'%s'\n", sig)
 		fmt.Println()
 		fmt.Printf("sgb goroutine:'%s'\n", sig)
 		// send true to the done channel

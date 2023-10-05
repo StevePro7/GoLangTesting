@@ -1,0 +1,22 @@
+https://www.craig-wood.com/nick/articles/deadlocks-in-go
+02-oct-2023
+
+A data race occurs when two goroutines access the same variable
+concurrently and at least one of the accesses is a write
+
+
+google
+golang channel deadlock detect
+
+deadlock in channel in Go
+condition that happens when a few goroutines are waiting for each
+other but no goroutine can proceed
+
+the program gets blocked thus leading to a deadlock
+
+the threads that the program creates serve as the foundation for
+the deadlock detector investigation
+
+
+google
+https://stackoverflow.com/questions/54157836/a-simple-example-about-go-channel-with-deadlock-and-why

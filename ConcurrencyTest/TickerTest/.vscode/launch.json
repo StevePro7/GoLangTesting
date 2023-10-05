@@ -14,8 +14,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": false,
-      "cwd": "/home/stevepro/GitHub/StevePro9/eBPFtesting/AssemblyLanguage/60-ProgrammingK8s/pvcwatch-cli",
-      "program": "/home/stevepro/GitHub/StevePro9/eBPFtesting/AssemblyLanguage/60-ProgrammingK8s/pvcwatch-cli/build/Debug/outDebug",
+      "cwd": "/home/stevepro/GitHub/StevePro7/GoLangTesting/ConcurrencyTest/TickerTest",
+      "program": "/home/stevepro/GitHub/StevePro7/GoLangTesting/ConcurrencyTest/TickerTest/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [

@@ -13,7 +13,8 @@ func boring(msg string) <-chan string {
 	c := make(chan string)
 	go func() {
 		for i := 0; ; i++ {
-			c <- fmt.Sprintf("[%d] %s %d", goid.ID(), msg, i)
+			val := fmt.Sprintf("[%d] %s %d", goid.ID(), msg, i)
+			c <- val
 			time.Sleep(time.Duration(rand.Intn(1e3)) * time.Millisecond)
 		}
 	}()

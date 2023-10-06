@@ -14,8 +14,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": false,
-      "cwd": "/home/stevepro/GitHub/StevePro7/GoLangTesting/ConcurrencyTest/RobPike/06_fan",
-      "program": "/home/stevepro/GitHub/StevePro7/GoLangTesting/ConcurrencyTest/RobPike/06_fan/build/Debug/outDebug",
+      "cwd": "/home/stevepro/GitHub/StevePro7/GoLangTesting/ConcurrencyTest/RobPike/07_lock",
+      "program": "/home/stevepro/GitHub/StevePro7/GoLangTesting/ConcurrencyTest/RobPike/07_lock/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [

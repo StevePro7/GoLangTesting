@@ -17,11 +17,12 @@ func main() {
 	go player("ping", table)
 	go player("pong", table)
 
-	//table <- new(Ball)
+	table <- new(Ball)
 	time.Sleep(1 * time.Second)
 	<-table
 
 	fmt.Printf("[%d] end\n", goid.ID())
+	panic("show the stacks")
 }
 
 func player(name string, table chan *Ball) {

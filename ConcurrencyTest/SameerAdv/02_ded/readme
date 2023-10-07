@@ -1,0 +1,21 @@
+readme
+07-Oct-2023
+
+
+goroutine 1 [chan receive]:
+main.main()
+	D:/GitHub/StevePro9/GoLangTesting/ConcurrencyTest/SameerAdv/02_ded/main.go:22 +0x1bb
+
+goroutine 35 [chan receive]:
+main.player({0x9446ed, 0x4}, 0xc000102120)
+	D:/GitHub/StevePro9/GoLangTesting/ConcurrencyTest/SameerAdv/02_ded/main.go:29 +0x5f
+created by main.main
+	D:/GitHub/StevePro9/GoLangTesting/ConcurrencyTest/SameerAdv/02_ded/main.go:17 +0x149
+
+goroutine 36 [chan receive]:
+main.player({0x9446f5, 0x4}, 0xc000102120)
+	D:/GitHub/StevePro9/GoLangTesting/ConcurrencyTest/SameerAdv/02_ded/main.go:29 +0x5f
+created by main.main
+	D:/GitHub/StevePro9/GoLangTesting/ConcurrencyTest/SameerAdv/02_ded/main.go:18 +0x1a5
+Process 15056 has exited with status 2
+Detaching

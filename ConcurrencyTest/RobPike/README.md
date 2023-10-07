@@ -2,10 +2,8 @@ Google I/O 2012 - Go Concurrency Patterns
 05-Oct-2023
 
 https://go.dev/blog/pipelines
-https://go.dev/blog/io2013-talk-concurrency
-
 https://www.youtube.com/watch?v=f6kdp27TYZs
-
+https://go.dev/blog/io2013-talk-concurrency
 
 
 Patterns

@@ -19,6 +19,13 @@ var (
 	Video = fakeSearch("video")
 )
 
+func Google(query string) (results []Result) {
+	results = append(results, Web(query))
+	results = append(results, Image(query))
+	results = append(results, Video(query))
+	return
+}
+
 func fakeSearch(kind string) Search {
 	return func(query string) Result {
 		duration := time.Duration(rand.Intn(100)) * time.Millisecond
@@ -29,6 +36,11 @@ func fakeSearch(kind string) Search {
 }
 func main() {
 	fmt.Printf("[%d] beg\n", goid.ID())
-
+	rand.Seed(time.Now().UnixNano())
+	start := time.Now()
+	results := Google("golang")
+	elapsed := time.Since(start)
+	fmt.Printf("[%d] %q\n", goid.ID(), results)
+	fmt.Printf("[%d] %q\n", goid.ID(), elapsed)
 	fmt.Printf("[%d] end\n", goid.ID())
 }

@@ -40,6 +40,7 @@ func fakeSearch(kind string) Search {
 		return Result{msg}
 	}
 }
+
 func main() {
 	fmt.Printf("[%d] beg\n", goid.ID())
 	rand.Seed(time.Now().UnixNano())

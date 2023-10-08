@@ -1,4 +1,4 @@
-Concurrency Patterns in Go
+	Concurrency Patterns in Go
 https://www.youtube.com/watch?v=YEKjSzIwAdA
 
 
@@ -20,7 +20,7 @@ Rob Pike
 
 Advanced Go Concurrency Patterns
 https://www.youtube.com/watch?v=QDDwwePbDtw&t=1543s
-Sameer Adv
+Sameer Ajmani
 
 
 Codewalk: Share Memory By Communicating
@@ -29,4 +29,12 @@ https://go.dev/doc/codewalk/sharemem
 
 
 Additional YT
+Concurrency patterns in Go
 https://www.youtube.com/watch?v=YEKjSzIwAdA&t=985s
+
+
+TODO
+deadlock detector
+race detector
+chan chan error
+resource leak detector

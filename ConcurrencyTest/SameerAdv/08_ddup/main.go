@@ -257,6 +257,60 @@ func Merge(subs ...Subscription) Subscription {
 	return m
 }
 
+type deduper struct {
+	s       Subscription
+	updates chan Item
+	closing chan chan error
+}
+
+func (d *deduper) Updates() <-chan Item {
+	return d.updates
+}
+func (d *deduper) Close() error {
+	errc := make(chan error)
+	d.closing <- errc
+	return <-errc
+}
+
+func (d *deduper) loop() {
+	in := d.s.Updates() // enable receive
+	var pending Item
+	var out chan Item // disable send
+	seen := make(map[string]bool)
+
+	for {
+		select {
+		case it := <-in:
+			if !seen[it.GUID] {
+				pending = it
+				in = nil        // disable receive
+				out = d.updates // enable send
+				seen[it.GUID] = true
+			}
+		case out <- pending:
+			in = d.s.Updates() // enable receive
+			out = nil          // disable send
+		case errc := <-d.closing:
+			err := d.s.Close()
+			errc <- err
+			close(d.updates)
+			return
+		}
+	}
+}
+
+// Dedupe converts a Subscription that may send duplicates Items into
+// one that doesn't
+func Dedupe(s Subscription) Subscription {
+	d := &deduper{
+		s:       s,
+		updates: make(chan Item),
+		closing: make(chan chan error),
+	}
+	go d.loop()
+	return d
+}
+
 func init() {
 	rand.Seed(time.Now().UnixNano())
 }
@@ -265,11 +319,13 @@ func main() {
 	fmt.Printf("[%d] beg\n", goid.ID())
 
 	// Subscribe to some feeds, and create a merged update stream.
-	merged := Merge(
+	merged := Dedupe(Merge(
+		Subscribe(Fetch("blog.golang.org")),
+		Subscribe(Fetch("blog.golang.org")),
 		Subscribe(Fetch("blog.golang.org")),
 		Subscribe(Fetch("googleblog.blogspot.com")),
 		Subscribe(Fetch("googledevelopers.blogspot.com")),
-	)
+	))
 
 	// Close the subscriptions after some time.
 	time.AfterFunc(3*time.Second, func() {

@@ -204,6 +204,34 @@ func Fetch(domain string) Fetcher {
 	return fakeFetch(domain)
 }
 
+type merge struct {
+	subs    []Subscription
+	updates chan Item
+	quit    chan struct{}
+	errs    chan error
+}
+
+func (m *merge) Updates() <-chan Item {
+	return m.updates
+}
+func (m *merge) Close() (err error) {
+	close(m.quit)
+	for _ = range m.subs {
+		if e := <-m.errs; e != nil { // HL
+			err = e
+		}
+	}
+	close(m.updates) // HL
+	return
+}
+
+// Merge returns a Subscription that merges the item streams from subs.
+// Closing the merged subscription closes subs.
+func Merge(subs ...Subscription) Subscription {
+	m := &merge{}
+
+	return m
+}
 func init() {
 	rand.Seed(time.Now().UnixNano())
 }
@@ -212,9 +240,15 @@ func main() {
 	fmt.Printf("[%d] beg1\n", goid.ID())
 
 	// Subscribe to some feeds, and create a merged update stream.
+	fetcher := Fetch("blog.golang.org")
+	sub := NaiveSubscribe(fetcher)
+	_ = sub
+
+	//merged := Merge{}
+	//_ = merged
 	//merged := Merge{
 	//	NaiveSubscribe(Fetch("blog.golang.org")),
 	//}
 
-	fmt.Printf("[%d] end3x\n", goid.ID())
+	fmt.Printf("[%d] end1\n", goid.ID())
 }

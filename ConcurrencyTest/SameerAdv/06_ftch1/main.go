@@ -194,7 +194,7 @@ func (f *fakeFetcher) Fetch() (items []Item, next time.Time, err error) {
 }
 
 func fakeFetch(domain string) Fetcher {
-	return fakeFetcher{
+	return &fakeFetcher{
 		channel: domain,
 	}
 }

@@ -285,4 +285,6 @@ func main() {
 	time.Sleep(1 * time.Second)
 
 	fmt.Printf("[%d] end\n", goid.ID())
+
+	panic("show me the stacks")
 }

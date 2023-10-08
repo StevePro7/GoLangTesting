@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"time"
 
 	"github.com/nikandfor/goid"
@@ -89,7 +90,7 @@ func (s *sub) loop() {
 			}()
 		case result := <-fetchDone: // HLfetch
 			fetchDone = nil // HLfetch
-			// Use result.fetched, resul.next, result.err
+			// Use result.fetched, result.next, result.err
 			fetched := result.fetched
 			next, err = result.next, result.err
 			if err != nil {
@@ -99,9 +100,15 @@ func (s *sub) loop() {
 			for _, item := range fetched {
 				if id := item.GUID; !seen[id] { //HLdupe
 					pending = append(pending, item)
-					send[id] = true //HLdupe
+					seen[id] = true //HLdupe
 				}
 			}
+		case errc := <-s.closing:
+			errc <- err
+			close(s.updates)
+			return
+		case updates <- first:
+			pending = pending[1:]
 		}
 	}
 }
@@ -117,8 +124,97 @@ func Subscribe(fetcher Fetcher) Subscription {
 	return s
 }
 
-func main() {
-	fmt.Printf("[%d] beg\n", goid.ID())
+type naiveSub struct {
+	fetcher Fetcher
+	updates chan Item
+	closed  bool
+	err     error
+}
 
-	fmt.Printf("[%d] end\n", goid.ID())
+func (s *naiveSub) Updates() <-chan Item {
+	return s.updates
+}
+func (s *naiveSub) Close() error {
+	s.closed = true // HLsync
+	return s.err    // HLsync
+}
+func (s *naiveSub) loop() {
+	for {
+		if s.closed { // HLsync
+			close(s.updates)
+			return
+		}
+		items, next, err := s.fetcher.Fetch()
+		if err != nil {
+			s.err = err                  // HLsync
+			time.Sleep(10 * time.Second) // HLsleep
+			continue
+		}
+		for _, item := range items {
+			s.updates <- item // HLsend
+		}
+		if now := time.Now(); next.After(now) {
+			time.Sleep(next.Sub(now)) // HLsleep
+		}
+	}
+}
+
+func NaiveSubscribe(fetcher Fetcher) Subscription {
+	s := &naiveSub{
+		fetcher: fetcher,
+		updates: make(chan Item),
+	}
+	go s.loop()
+	return s
+}
+
+type fakeFetcher struct {
+	channel string
+	items   []Item
+}
+
+// FakeDuplicates causes the fake fetcher to return duplicate items.
+var FakeDuplicates bool
+
+func (f *fakeFetcher) Fetch() (items []Item, next time.Time, err error) {
+	now := time.Now()
+	next = now.Add(time.Duration(rand.Intn(5)) * 500 * time.Millisecond)
+	item := Item{
+		Channel: f.channel,
+		Title:   fmt.Sprintf("[%d] Item %d", goid.ID(), len(f.items)),
+	}
+	item.GUID = item.Channel + "/" + item.Title
+	f.items = append(f.items, item)
+	if FakeDuplicates {
+		items = f.items
+	} else {
+		items = []Item{item}
+	}
+	return
+}
+
+func fakeFetch(domain string) Fetcher {
+	return fakeFetcher{
+		channel: domain,
+	}
+}
+
+// Fetch returns a Fetcher for Items from domain.
+func Fetch(domain string) Fetcher {
+	return fakeFetch(domain)
+}
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
+func main() {
+	fmt.Printf("[%d] beg1\n", goid.ID())
+
+	// Subscribe to some feeds, and create a merged update stream.
+	//merged := Merge{
+	//	NaiveSubscribe(Fetch("blog.golang.org")),
+	//}
+
+	fmt.Printf("[%d] end3x\n", goid.ID())
 }

@@ -6,3 +6,7 @@ https://cs.opensource.google/go/x/website/+/master:_content/talks/2013/advconc/n
 
 if do not have chan chan error then get the message
 cannot use errc (variable of type chan error) as error value in send: chan error does not implement error (missing method Error)
+
+
+fakeFetcher must return address of otherwise will get the message
+cannot use (fakeFetcher literal) (value of type fakeFetcher) as Fetcher value in return statement: fakeFetcher does not implement Fetcher (method Fetch has pointer receiver)

@@ -18,3 +18,16 @@ https://cs.opensource.google/go/x/website/+/master:_content/talks/2013/advconc/r
 
 
 naivemain
+realmain
+
+
+TODO - investigate further
+deadlock detector
+good for unit tests
+
+race detector
+good for larger tests e.g. integration tests
+
+chan chan error
+
+

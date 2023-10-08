@@ -216,7 +216,7 @@ func (m *merge) Updates() <-chan Item {
 }
 func (m *merge) Close() (err error) {
 	close(m.quit)
-	for _ = range m.subs {
+	for range m.subs {
 		if e := <-m.errs; e != nil { // HL
 			err = e
 		}
@@ -228,10 +228,35 @@ func (m *merge) Close() (err error) {
 // Merge returns a Subscription that merges the item streams from subs.
 // Closing the merged subscription closes subs.
 func Merge(subs ...Subscription) Subscription {
-	m := &merge{}
+	m := &merge{
+		subs:    subs,
+		updates: make(chan Item),
+		quit:    make(chan struct{}),
+		errs:    make(chan error),
+	}
 
+	for _, sub := range subs {
+		go func(s Subscription) {
+			for {
+				var it Item
+				select {
+				case it = <-s.Updates():
+				case <-m.quit: // HL
+					m.errs <- s.Close() // HL
+					return              // HL
+				}
+				select {
+				case m.updates <- it:
+				case <-m.quit: // HL
+					m.errs <- s.Close() // HL
+					return              // HL
+				}
+			}
+		}(sub)
+	}
 	return m
 }
+
 func init() {
 	rand.Seed(time.Now().UnixNano())
 }
@@ -240,15 +265,17 @@ func main() {
 	fmt.Printf("[%d] beg1\n", goid.ID())
 
 	// Subscribe to some feeds, and create a merged update stream.
-	fetcher := Fetch("blog.golang.org")
-	sub := NaiveSubscribe(fetcher)
-	_ = sub
+	//fetcher := Fetch("blog.golang.org")
+	//sub := NaiveSubscribe(fetcher)
+	//_ = sub
+	//merged := Merge(sub)
+	//
+	merged := Merge(
+		NaiveSubscribe(Fetch("blog.golang.org")),
+		NaiveSubscribe(Fetch("googleblog.blogspot.com")),
+		NaiveSubscribe(Fetch("googledevelopers.blogspot.com")),
+	)
 
-	//merged := Merge{}
-	//_ = merged
-	//merged := Merge{
-	//	NaiveSubscribe(Fetch("blog.golang.org")),
-	//}
-
-	fmt.Printf("[%d] end1\n", goid.ID())
+	_ = merged
+	fmt.Printf("[%d] end8\n", goid.ID())
 }

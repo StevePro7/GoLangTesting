@@ -262,20 +262,27 @@ func init() {
 }
 
 func main() {
-	fmt.Printf("[%d] beg1\n", goid.ID())
+	fmt.Printf("[%d] beg\n", goid.ID())
 
 	// Subscribe to some feeds, and create a merged update stream.
-	//fetcher := Fetch("blog.golang.org")
-	//sub := NaiveSubscribe(fetcher)
-	//_ = sub
-	//merged := Merge(sub)
-	//
 	merged := Merge(
 		NaiveSubscribe(Fetch("blog.golang.org")),
 		NaiveSubscribe(Fetch("googleblog.blogspot.com")),
 		NaiveSubscribe(Fetch("googledevelopers.blogspot.com")),
 	)
 
-	_ = merged
-	fmt.Printf("[%d] end8\n", goid.ID())
+	// Close the subscriptions after some time.
+	time.AfterFunc(3*time.Second, func() {
+		fmt.Printf("[%d] closed: %v\n", goid.ID(), merged.Close())
+	})
+
+	// Print the stream.
+	for it := range merged.Updates() {
+		fmt.Printf("[%d] %s %s\n", goid.ID(), it.Channel, it.Title)
+	}
+
+	// The loops are still running.  Let the race detector notice
+	time.Sleep(1 * time.Second)
+
+	fmt.Printf("[%d] end\n", goid.ID())
 }

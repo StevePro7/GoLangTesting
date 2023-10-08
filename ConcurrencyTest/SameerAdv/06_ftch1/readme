@@ -1,0 +1,8 @@
+naivemain
+08-Oct-2023
+
+https://cs.opensource.google/go/x/website/+/master:_content/talks/2013/advconc/naivemain
+
+
+if do not have chan chan error then get the message
+cannot use errc (variable of type chan error) as error value in send: chan error does not implement error (missing method Error)

@@ -281,10 +281,6 @@ func main() {
 		fmt.Printf("[%d] %s %s\n", goid.ID(), it.Channel, it.Title)
 	}
 
-	// The loops are still running.  Let the race detector notice
-	time.Sleep(1 * time.Second)
-
 	fmt.Printf("[%d] end\n", goid.ID())
-
 	panic("show me the stacks")
 }

@@ -1,6 +1,3 @@
-	Concurrency Patterns in Go
-https://www.youtube.com/watch?v=YEKjSzIwAdA
-
 
 https://go.dev/blog/pipelines
 

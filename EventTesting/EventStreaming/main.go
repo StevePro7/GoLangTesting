@@ -38,7 +38,6 @@ func main() {
 		if err != nil {
 			break
 		}
-
-		fmt.Printf("Rec'd msg: key=%s, val=%s\n", string(msg.Key), string(msg.Value))
+		fmt.Printf("Received message: key=%s, value=%s\n", string(msg.Key), string(msg.Value))
 	}
 }

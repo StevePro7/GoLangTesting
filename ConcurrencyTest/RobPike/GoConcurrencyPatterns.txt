@@ -1,0 +1,63 @@
+Google I/O 2012
+07-Nov-2023
+
+https://www.youtube.com/watch?v=f6kdp27TYZs
+
+A lot of independently executing things
+independent agents
+
+concurrency:
+writing or structuring to deal with the real world
+
+definition of concurrency
+composition of independently executing computations [goroutines]
+
+a way to structure software to write clean code that interacts well with real world
+
+concurrency is NOT parallelism although is enables parallelism
+
+one processor: program can be concurrent but it cannot be parallel
+well-written concurrent program may run efficiently in parallel on multiprocessor
+
+
+Concurrency is a model for software construction
+- easy to understand
+- easy to use
+- easy to reason about
+- nicer than dealing with parallelism	[threads, semaphores, locks, barriers]
+
+
+1978
+Hoare CSP
+Communicating Sequential Processes
+https://www.cs.cmu.edu/~crary/819-f09/Hoare78.pdf
+
+
+Go don't talk to a process but a channel
+
+
+CODE
+
+goroutine
+launching a shell command with &
+
+goroutine
+independently executing function
+launched by go statement
+has its own stack	grows / shrinks
+very cheap		[think cheap thread]
+NOT a thread
+may be 1x thread with 000s goroutines
+goroutines multiplexed dynamically onto threads created as needed
+
+
+communication
+channel in Go provides a connectio between two goroutines
+allowing them to communicate
+
+
+direction
+arrow points in the direction in which the channel is sending data
+
+c <- 1		send	1 is pointing into the channel
+value = <-c	recd 	arrow is point out of the channel

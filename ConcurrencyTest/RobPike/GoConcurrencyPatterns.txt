@@ -61,3 +61,21 @@ arrow points in the direction in which the channel is sending data
 
 c <- 1		send	1 is pointing into the channel
 value = <-c	recd 	arrow is point out of the channel
+
+
+synchronization
+function executes <-c		it will wait for value to be send
+function executes c <- value	it waits for receiver to be ready
+
+sender + receiver must both be ready to play part in communcation
+otherwise we wait until they are	[can deadlock otherwise]
+
+channels both communicate and synchronize
+
+when you read from a channel you have to wait for a value to be there
+it's a blocking operation
+
+when you send a value on a channel, the channel blocks until someone is ready to receive it
+it's a blocking operation
+
+channels communicate and synchronize in a single operation

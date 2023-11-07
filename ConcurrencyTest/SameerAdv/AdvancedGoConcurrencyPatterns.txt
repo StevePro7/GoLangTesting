@@ -57,3 +57,193 @@ select will block until one of these cases can proceed
 which means that communication happened
 
 body of case statement can take action on that event
+
+
+EXAMPLE: feed reader
+
+Naive approach
+
+Bug #1
+closed bit and error are being accessed by two Goroutines with no synchronization
+data race!
+
+err
+partially written types because these are executing in shared address space
+
+go race detector
+go run -race naivemain.go 
+
+error data race
+read in goroutine called loop()
+write to that value from teh goroutine that ran Close()
+
+
+race detector
+program doing a lot of concurrency, goroutines, data to discover when  
+you're not synchronizing properly
+
+
+Bug #2
+sleep may keep loop running
+resource leak
+loop is just sleeping when it has nothing else to do
+i.e.
+it's not responsive when it's time to close the subscription
+
+IMPORTANT
+as soon as user calls Close() we clean up because there's no reason for this to
+hang around
+
+
+Bug #3
+hardest to catch
+send will block until there is a goroutine ready to receive the value
+
+so what happens when the client of the subscription calls Close()
+and then stops using the subscription
+thus
+this send will block indefinitely
+s.updates <- item
+
+there's no one to receive it - nothings going to happen
+loop goroutine is going to stay hanging around in the system forever
+
+
+SOLN
+change body of loop to select with 3x cases
+1. Close was called
+2. it's time to call Fetch
+3. send an item on s.updates
+
+
+select can allow you to consider multiple things that could happen at the same time
+when one happens then take action on it and consider them all again
+
+
+Structure: for-select loop
+loop runs in its own goroutine
+select lets loop avoid blocking indefinitely in any one state
+cases interact via local state in loop
+
+IMPORTANT
+no data races [in select statement] because 
+this is a single goroutine
+this is straight-line code
+
+it's much more algorithmic than you might be used to in dealing with threads in 
+event-driven style
+
+
+Case 1: Close
+Close communicates with loop via s.closing
+
+type sub struct {
+	closing chan chan error
+}
+
+service (loop) listens for requests on its channel (s.closing)
+client (Close) sends a request on s.closing: exit and reply with the error
+only thing in the reuqest is the reply channel
+
+NB:
+closing chan chan error
+
+chan of chan of error
+it's a channel on which you pass a channel
+
+request response structure
+
+loop is a little server that's listening for requests on this closing channel
+i.e. requests to close
+
+when we call Close we're going to say loop close and we're going wait until
+the loop acknowledges that by sending us back the error if there's been an error on
+Fetch or nil if there's been no error
+
+
+Close asks loop to exit and wits for a response
+loop handles Close by replying with the Fetch error and exiting
+
+Close creates the channel it wants to receive an error
+sends that [error] to the loop and then waits for the error to come back
+
+
+loop
+select first case
+if we receive a value on closing then deliver the error to the listener
+close updates channel and then return
+
+
+error is the one that Fetch is going to write to
+
+
+Case 2: Fetch
+state here is what's returned by fetch and shared with the other cases
+set of items we want to Fetch and deliver to the client
+next fetch
+error from a failed fetch
+
+Fetch
+if succeeded then we'll append the fetched items to the pending queue
+
+
+Case 3: Send
+last case is going to deliver the items in the pending queue to the client of the type
+
+fix panic
+
+Select and nil channels
+sends and receives on nil channels block		[doesn't panic]
+select never selects a blocking case
+
+i.e.
+set a channel to nil to disable a case that we don't need this time around
+
+
+Summary
+case errc := <-s.closing	send the error to the user and exit
+case <-startFetch		time to run the Fetch and append the pending queue
+case updates <- first:		advance the queue
+
+IMP
+3x cases are interacting with the local state and loop
+there's no races
+
+
+Bugs fixed
+Bug #1	unsynchronized access to s.closed and s.err
+Bug #2	time.Sleep may kiip loop running
+Bug #3	loop may block forever sending on s.updates
+
+
+Issue:	Fetch may return duplicates
+Fix:	Filter items before adding to pending
+
+Issue:	Pending queue grows without bound
+Fix:	Disable fetch case when too much pending
+
+Issue:	Loop blocks on Fetch
+Fix:	Run Fetch asynchronously
+we need a channel on which select can send its results
+define a fetch result struct containing the fetched items
+explains further to complete this and not block on the IO
+
+
+SUBSCRIBE
+1. for-select loop
+2. service channel, reply channels [chan chan error]
+3. nil channels in select cases
+
+i.e.
+request / response channel
+
+Goroutines in Go can have them acting as servers and clients 
+on a little distributed system that you own
+
+use Channels to exchange data
+
+build a lot of the same structures you see in distribute systems within your program
+
+
+Finally, technique of setting channel to nil and select cases to turn
+cases on and off - helps you simplify the logic

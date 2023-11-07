@@ -3,6 +3,9 @@ Google I/O 2012
 
 https://www.youtube.com/watch?v=f6kdp27TYZs
 
+Reference:
+https://github.com/gobridge/concurrency-patterns/blob/master/README.md
+
 A lot of independently executing things
 independent agents
 
@@ -177,3 +180,34 @@ send message to next etc. to receiver
 
 REAL WORLD example
 Go designed to build systems software
+
+Program:
+the individual elements of the program are all straightforward sequential code
+composing their independent execution to give the behaviour of the total server
+
+
+NEXT STEPS
+
+Chatroulette Toy:
+http://tinyurl.com/gochatroulette
+
+Load Balancer:
+http://tinyurl.com/goloadbalancer
+
+Concurrent Prime Sieve:
+http://tinyurl.com/gosieve
+
+Concurrent Power Series (by Mcllroy)
+http://tinyurl.com/gopowerseries
+
+
+CAUTION
+goroutines and channels are tools for program construction
+but
+sometimes all you need is a reference counter
+e.g.
+sync
+sync/atomic
+packages provide mutexes, condition variables
+i.e.
+tools for smaller problems

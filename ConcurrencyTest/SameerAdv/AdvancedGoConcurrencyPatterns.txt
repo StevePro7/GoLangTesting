@@ -1,0 +1,4 @@
+Google I/O 2013 - Advanced Go Concurrency Patterns
+07-Nov-2023
+
+https://www.youtube.com/watch?v=QDDwwePbDtw

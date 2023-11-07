@@ -2,3 +2,58 @@ Google I/O 2013 - Advanced Go Concurrency Patterns
 07-Nov-2023
 
 https://www.youtube.com/watch?v=QDDwwePbDtw
+
+
+goroutines are independently executing functions in the same address space
+
+channels are typed values that allow goroutines to synchronize and exchange information
+
+
+anonymous function closure
+e.g.
+go func() { c <- 3 }()
+send will block until some other goroutine is ready to receive from that channel
+
+n := <-c
+statement will block until some goroutine sends its value and store value in variable "n"
+
+
+Example: ping-pong
+
+benefit of having concurrency managed by the Go runtime is we can detect 
+when system is deadlock
+e.g.
+if we never send the ball on the channel then we'll get fatal error
+"All goroutines are sleep deadlock"
+
+Print stacktraces of all goroutines in the system
+
+
+panic()
+also dumps the goroutine stacks
+
+
+Resource leak
+goroutines continue in the system
+
+long-lived programs need to clean up
+handle communication, periodic events and cancellation
+
+Go select statement:
+like a switch but the decision is made based on the ability to communicate
+
+select blocks until one of its cases can proceed
+each case is a communication
+e.g.
+
+case xc <- x:
+attempts to send the value x on channel xc
+
+case y := <-yc
+attempts to receive a value from the channel yc and store in variable y
+
+
+select will block until one of these cases can proceed
+which means that communication happened
+
+body of case statement can take action on that event

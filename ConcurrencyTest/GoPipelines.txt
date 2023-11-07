@@ -1,0 +1,52 @@
+Go Pipelines
+07-Nov-2023
+
+https://go.dev/blog/pipelines
+
+Pipeline
+series of stages connected by channels
+each state is a group of goroutines running the same function
+
+* recd values upstream via inbound channels
+* perform function on data produce new values
+* send values downstream via outbound channels
+
+
+first stage
+source	producer
+
+last stage
+sink	consumer
+
+
+Fan-out, fan-in
+
+Fan-out
+multiple functions read from same channel until channel closed
+distribute work amongst group of workers to parallelize CPU + I/O
+
+Fan-in
+function read from multiple inputs and processed until all channels closed
+multiplex input channels onto a single channel that's closed when all inputs closed
+
+
+Stopping short
+* stages close their outbound channels when all send operations are done
+* stages keep receiving values from inbound channels until channels closed
+
+
+NOTE
+if a stage fails to consume all inbound values then the goroutines attempting to send
+those values will block indefinitely
+
+
+Resource leak
+goroutines consume memory and runtime resources
+heap references in goroutine stacks keep data from being garbage collected
+
+
+SOLN
+change outbound channels to have a buffer
+e.g.
+gen()
+copy list of integers into buffered channel and avoid creating new goroutine

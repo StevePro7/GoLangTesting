@@ -118,3 +118,62 @@ which to communicate to the process that's running that goroutine
 channels as a handle on a service
 function returns a channel that lets us communicate with the service it provides
 can have more instances of the service
+
+
+03. Multiplexing
+use fan-in function [a multiplexer] to let whosoever is ready to talk
+construct a single channel from which we can receive from both channels
+
+
+04. Lockstep
+restoring sequencing
+send a channel on a channel making goroutine wait its turn
+recd all messages then enable them again by sending on private channel
+i.e.
+can send inside a channel another channel to be used for the answer to come back
+e.g.
+type Message struct {
+	str string
+	wait chan bool
+}
+
+wait channel is like a signaller
+block on the wait channel until the person says proceed
+independently executing guys are waiting on different channels for the signal to advance
+
+
+05. Select statement
+control structure [like switch] that lets you control the behavior of your program
+based on what communications are able to proceed at any moment
+
+control structure unique to concurrency
+reason channels and goroutines are built into the language
+
+select statement provides another way to handle multiple channels
+like a switch but each case is a communication
+- all channels evaluated
+- selection blocks until one communication can proceed
+- if multiple can proceed then select chooses pseudo-randomly
+- default clause, if present, executes immediately if no channel is ready
+
+
+06. Timeout
+time.After function returns a channel that blocks for the specified duration
+After the interval, the channel delivers the current time, once
+OR
+timeout total time elapsed
+
+
+07. Quit
+create quit channel then signal quit and select will receive on quit channel and quit
+OR
+receive on quit channel to let know when all is finished
+wait for it to tell us it's done: receive on the quit channel
+
+
+08. Daisy-chain
+send message to next etc. to receiver
+
+
+REAL WORLD example
+Go designed to build systems software

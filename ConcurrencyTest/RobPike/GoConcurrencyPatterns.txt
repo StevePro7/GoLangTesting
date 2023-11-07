@@ -79,3 +79,42 @@ when you send a value on a channel, the channel blocks until someone is ready to
 it's a blocking operation
 
 channels communicate and synchronize in a single operation
+
+
+
+BUFFERED channels
+buffering removes synchronization
+buffering makes them more like Erlang's mailboxes
+buffering can be important for some problems but more subtle to reason about
+
+buffered channels have property that they don't synchronize when you send
+because you can just drop a value in the buffer and keep going
+
+
+IMPORTANT
+don't communicate by sharing memory rather share memory by communicating
+
+use the channel to pass the data back n' forth btwn the goroutines
+make your concurrent program operate that way
+
+
+Patterns
+
+01. Generator
+function that returns a channel
+
+e.g.
+func boring(msg string) <-chan string
+return value is a channel that you can only receive from
+
+because the caller is only going to use it as a received value
+<-c
+
+generator returns a channel back to the caller the channel with
+which to communicate to the process that's running that goroutine
+
+
+02. Service
+channels as a handle on a service
+function returns a channel that lets us communicate with the service it provides
+can have more instances of the service

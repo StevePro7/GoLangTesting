@@ -81,3 +81,10 @@ unknown + unbuffered number of goroutines to stop sending their values downstrea
 In Go can do this by closing a channel because
 a receive operation of a closed channel can always proceed immediately,
 yielding the element type's zero value
+
+This means main can unblock senders by closing the done channel
+close() is a broadcast signal to the senders
+
+Extend each pipeline function to accept done as parameter and arrange for the 
+close to happen via a defer statement so all return paths from main signal pipeline
+stages to exit

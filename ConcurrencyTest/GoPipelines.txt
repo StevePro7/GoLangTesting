@@ -45,8 +45,39 @@ goroutines consume memory and runtime resources
 heap references in goroutine stacks keep data from being garbage collected
 
 
-SOLN
+SOLN #1
 change outbound channels to have a buffer
 e.g.
 gen()
 copy list of integers into buffered channel and avoid creating new goroutine
+
+
+Example of bad code
+if downstream stage reads any fewer values then we will again have blocked goroutines
+
+
+SOLN #2
+Explicit cancellation
+tell goroutnes in the upstream stages to abandon vales they're trying to send
+does by sending values on a channel called done
+
+
+done := make(chan struct{}, 1)
+done <- struct{}{}
+
+done uses empty struct [0x bytes] as value doesn't matter
+it is the receive event that indicates the send on out should be abandoned
+
+output goroutines continue looping on their inbound channel
+so the upstream stages are not blocked
+
+PROBLEM
+each downstream receiver needs to know the number of potentially blocked upstream senders
+and arrange to signal those senders on early return
+
+Need
+unknown + unbuffered number of goroutines to stop sending their values downstream
+
+In Go can do this by closing a channel because
+a receive operation of a closed channel can always proceed immediately,
+yielding the element type's zero value

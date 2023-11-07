@@ -88,3 +88,38 @@ close() is a broadcast signal to the senders
 Extend each pipeline function to accept done as parameter and arrange for the 
 close to happen via a defer statement so all return paths from main signal pipeline
 stages to exit
+
+Each pipeline stage now free to return as soon as done is closed
+output routine in merge can return without draining its inbound channel since sq will
+stop attempting to send when done is closed
+
+
+SUMMARY
+guidelines for pipeline construction
+* stages close their outbound channels when all the send operations are done
+* stages keep receiving values from inbound channels until those channels are closed OR the
+  senders are unblocked
+
+
+Digesting a tree
+
+Parallel digestion	2x stage pipeline
+stage 01 		walks the tree digests each file in a new goroutine
+stage 02 		sends the results on a channel with value type result
+
+
+Bounded parallelism
+stage 01 		walk the tree
+stage 02 		read and digest the files
+stage 03		collects the digests
+
+
+CONCLUSION
+construct streaming data pipelines in Go
+
+dealing with failures in pipelines is tricky:
+each stage in the pipeline may block attempting to send values downstream and
+the downstream stage may no longer care about the incoming data
+
+closing a channel can broadcast a "done" signal to all the goroutines started by a 
+pipeline and defined guidelines for constructing pipelines correctly

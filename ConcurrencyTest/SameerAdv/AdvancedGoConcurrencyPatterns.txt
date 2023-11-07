@@ -247,3 +247,35 @@ build a lot of the same structures you see in distribute systems within your pro
 
 Finally, technique of setting channel to nil and select cases to turn
 cases on and off - helps you simplify the logic
+
+
+CONCLUSION
+concurrent programming can be tricky
+
+Go makes it easier:
+* channels convey data, timer events, cancellation signals
+* goroutines serialize access to local mutable state
+* stack traces & deadlock detector
+* race detector
+
+
+deadlock detector good for running unit test - testing data type in isolation
+if everything seizes up then you can see what goes wrong
+
+
+race detector good for larger / integration tests and larger programs to see
+whether things are working right at scale when you've got lots of goroutines
+exchaning data and accessing state
+
+
+Concurrency Is Not Parallelism
+https://golang.org/s/concurrency-is-not-parallelism
+https://vimeo.com/49718712
+
+difference btwn how you structure your code to deal with a lot of events
+and what it means for things to run in parallel at the same time
+
+
+CODE WALK
+Codewalk: Share Memory By Communicating
+https://golang.org/doc/codewalk/sharemem

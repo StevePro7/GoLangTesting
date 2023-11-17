@@ -1,15 +1,12 @@
 package main
 
-func routine(ch chan struct{}) {
-	<-ch
-	println("recd_func")
-	close(ch)
-}
+import "bytes"
 
 func main() {
-	ch := make(chan struct{})
-	go routine(ch)
-	ch <- struct{}{}
-	<-ch
-	println("recd_main")
+
+	sl1 := []byte{'I', 'N', 'T', 'E', 'R', 'V', 'I', 'E', 'W'}
+	sl2 := []byte{'B', 'I', 'T'}
+
+	res := bytes.Compare(sl1, sl2)
+	println(res)
 }

@@ -21,6 +21,16 @@ func Merge(left, rght []int) []int {
 	return merged
 }
 
+func MergeSort_SEQ(data []int) []int {
+	if len(data) <= 1 {
+		return data
+	}
+	midd := len(data) / 2
+	left := MergeSort(data[:midd])
+	rght := MergeSort(data[midd:])
+	return Merge(left, rght)
+}
+
 func MergeSort(data []int) []int {
 	if len(data) <= 1 {
 		return data
@@ -40,7 +50,7 @@ func MergeSort(data []int) []int {
 func main() {
 	println("beg")
 	data := []int{9, 4, 3, 6, 1, 2, 10, 5, 7, 8}
+	//fmt.Printf("%v\n%v\n", data, MergeSort_SEQ(data))
 	fmt.Printf("%v\n%v\n", data, MergeSort(data))
-	//fmt.Printf("%v\n%v\n", data, data)
 	println("end")
 }

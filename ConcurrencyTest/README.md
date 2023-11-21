@@ -1,6 +1,5 @@
-
+Go pipelines
 https://go.dev/blog/pipelines
-
 
 
 LINKS
@@ -27,8 +26,19 @@ https://go.dev/doc/codewalk/sharemem
 
 Additional YT
 Concurrency patterns in Go
-https://www.youtube.com/watch?v=YEKjSzIwAdA&t=985s
+https://www.youtube.com/watch?v=YEKjSzIwAdA
 
+
+
+NEW
+Master Go Programming With These Concurrency Patterns (in 40 minutes)
+https://www.youtube.com/watch?v=qyM8Pi1KiiM
+
+Master Go Programming By Taming Your Goroutines (in 40 minutes)
+https://www.youtube.com/watch?v=wELNUHb3kuA
+
+Improve Go Concurrency Performance With This Pattern
+https://www.youtube.com/watch?v=Bk1c30avsuU
 
 TODO
 deadlock detector

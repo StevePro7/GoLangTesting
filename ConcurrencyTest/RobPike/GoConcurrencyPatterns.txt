@@ -55,7 +55,7 @@ goroutines multiplexed dynamically onto threads created as needed
 
 
 communication
-channel in Go provides a connectio between two goroutines
+channel in Go provides a connection between two goroutines
 allowing them to communicate
 
 
@@ -67,7 +67,7 @@ value = <-c	recd 	arrow is point out of the channel
 
 
 synchronization
-function executes <-c		it will wait for value to be send
+function executes <-c		it will wait for value to be sent
 function executes c <- value	it waits for receiver to be ready
 
 sender + receiver must both be ready to play part in communcation

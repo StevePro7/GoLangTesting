@@ -22,7 +22,6 @@ func main() {
 	unshardedMap := newUnshardedMap()
 	t := time.Now()
 	wg := sync.WaitGroup{}
-
 	for i := 0; i < 1000000; i++ {
 		wg.Add(1)
 		go func(i int) {
@@ -39,15 +38,13 @@ func main() {
 			defer wg.Done()
 			unshardedMap.RLock()
 			_ = unshardedMap.m[fmt.Sprintf("key%d", i)]
-			defer newUnshardedMap().RUnlock()
+			defer unshardedMap.RUnlock()
 		}(i)
 	}
-
 	wg.Wait()
 
 	fmt.Println(time.Since(t))
 	t = time.Now()
-
 	shardedMap := sharded.NewShardedMap(10)
 	for i := 0; i < 1000000; i++ {
 		wg.Add(1)
@@ -64,7 +61,6 @@ func main() {
 			_ = shardedMap.Get(fmt.Sprintf("key%d", i))
 		}(i)
 	}
-
 	wg.Wait()
 	fmt.Println(time.Since(t))
 }

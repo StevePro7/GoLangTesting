@@ -16,3 +16,9 @@ task: Available tasks for this project:
 Subdir
 task terraform-apply
 /home/stevepro/GitHub/StevePro7/GoLangTesting/GoTask/02-TutorialEdge/terraform
+
+
+Task dependencies
+task terraform-apply
+Running terraform plan...
+Running terraform apply...

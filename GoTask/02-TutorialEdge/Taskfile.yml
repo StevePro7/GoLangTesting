@@ -7,9 +7,17 @@ tasks:
       - echo "Hello World from Task!"
     silent: true
 
-  terraform-apply:
-    desc: "A task demonstrating a subdir"
+  terraform-plan:
+    desc: "A mock terraform plan"
     dir: terraform
     cmds:
-      - pwd
+      - echo "Running terraform plan..."
+    silent: true
+
+  terraform-apply:
+    desc: "A mock terraform apply"
+    dir: terraform
+    deps: [terraform-plan]
+    cmds:
+      - echo "Running terraform apply..."
     silent: true

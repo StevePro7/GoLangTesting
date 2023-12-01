@@ -1,0 +1,15 @@
+version: '3'
+
+tasks:
+  hello:
+    desc: "A Hello World Task"
+    cmds:
+      - echo "Hello World from Task!"
+    silent: true
+
+  terraform-apply:
+    desc: "A task demonstrating a subdir"
+    dir: terraform
+    cmds:
+      - pwd
+    silent: true

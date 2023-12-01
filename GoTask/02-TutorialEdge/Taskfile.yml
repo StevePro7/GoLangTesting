@@ -7,6 +7,15 @@ tasks:
       - echo "Hello World from Task!"
     silent: true
 
+  install:
+    desc: "An example of dynamic variables"
+    cmds:
+      - echo "Installing tool into {{.HOMEDIR}}"
+    silent: true
+    vars:
+      HOMEDIR:
+        sh: echo $HOME/.mydir
+
   terraform-plan:
     desc: "A mock terraform plan"
     dir: terraform

@@ -14,11 +14,24 @@ task: Available tasks for this project:
 
 
 Subdir
+dir: terraform
 task terraform-apply
 /home/stevepro/GitHub/StevePro7/GoLangTesting/GoTask/02-TutorialEdge/terraform
 
 
 Task dependencies
+deps: [terraform-plan]
 task terraform-apply
 Running terraform plan...
 Running terraform apply...
+
+
+Dynamic Variables
+vars
+e.g.
+{{.HOMEDIR}}
+task install
+Installing tool into /home/stevepro/.mydir
+
+
+General Taskfile for Go devs

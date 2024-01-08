@@ -1,0 +1,22 @@
+CGO Example
+08-Jan-2024
+
+
+Header file
+#ifdef __cplusplus
+extern "C" {
+#endif
+void Hello();
+int msc_intervention();
+#ifdef __cplusplus
+}
+#endif
+
+
+
+C++
+https://github.com/StevePro7/GolangWebApplicationFirewall/tree/main/00-Test/00-Test_CGO
+
+https://gist.github.com/nmarley/6d4dadc002ff99dd4835bd34c6b025c7
+
+https://github.com/fukata/golang-cgo_cpp_examples/tree/master/string
